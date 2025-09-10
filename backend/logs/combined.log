@@ -1,0 +1,44 @@
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 09:55:17"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 09:55:18"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 09:55:18"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 09:55:18"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 09:55:18"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 09:55:42"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 09:55:42"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 09:55:42"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 09:55:42"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 09:55:42"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 10:00:42"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 10:00:42"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:00:42"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 10:00:42"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 10:00:42"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 10:04:15"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 10:04:15"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:04:15"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 10:04:15"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 10:04:15"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 10:05:17"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 10:05:17"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:05:17"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 10:05:17"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 10:05:17"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 10:57:07"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 10:57:07"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:57:07"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 10:57:07"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 10:57:07"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 10:57:20"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 10:57:20"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:57:20"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 10:57:20"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 10:57:20"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Conexão com Redis estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Conexão com Redis estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Servidor rodando na porta 5001","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"info","message":"Ambiente: development","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
