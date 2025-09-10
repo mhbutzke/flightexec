@@ -9,7 +9,7 @@ router.post('/', async (req: Request, res: Response) => {
     // TODO: Implementar busca em tempo real
     res.json({
       message: 'Busca em tempo real - em desenvolvimento',
-      body: req.body
+      body: req.body,
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -21,7 +21,7 @@ router.get('/history', async (req: Request, res: Response) => {
   try {
     // TODO: Implementar histórico de buscas
     res.json({
-      message: 'Histórico de buscas - em desenvolvimento'
+      message: 'Histórico de buscas - em desenvolvimento',
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });

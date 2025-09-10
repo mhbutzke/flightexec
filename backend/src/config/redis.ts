@@ -10,8 +10,7 @@ const redisClient = createClient({
 
 export const connectRedis = async (): Promise<void> => {
   try {
-
-    redisClient.on('error', (err) => {
+    redisClient.on('error', err => {
       logger.error('Erro no Redis:', err);
     });
 

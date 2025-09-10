@@ -35,9 +35,9 @@ class SocketService {
       cors: {
         origin: process.env.FRONTEND_URL || 'http://localhost:3000',
         methods: ['GET', 'POST'],
-        credentials: true
+        credentials: true,
       },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
     });
 
     this.setupMiddleware();
@@ -49,15 +49,20 @@ class SocketService {
   private setupMiddleware(): void {
     this.io.use(async (socket: any, next) => {
       try {
-        const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
-        
+        const token =
+          socket.handshake.auth.token ||
+          socket.handshake.headers.authorization?.replace('Bearer ', '');
+
         if (!token) {
           logger.warn(`Conexão WebSocket rejeitada: token não fornecido`);
           return next(new Error('Token de autenticação necessário'));
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any;
-        
+        const decoded = jwt.verify(
+          token,
+          process.env.JWT_SECRET || 'fallback-secret'
+        ) as any;
+
         // Buscar usuário no banco
         const user = await prisma.user.findUnique({
           where: { id: decoded.userId },
@@ -65,12 +70,14 @@ class SocketService {
             id: true,
             email: true,
             name: true,
-            isActive: true
-          }
+            isActive: true,
+          },
         });
 
         if (!user || !user.isActive) {
-          logger.warn(`Conexão WebSocket rejeitada: usuário ${decoded.userId} não encontrado ou inativo`);
+          logger.warn(
+            `Conexão WebSocket rejeitada: usuário ${decoded.userId} não encontrado ou inativo`
+          );
           return next(new Error('Usuário não autorizado'));
         }
 
@@ -95,27 +102,27 @@ class SocketService {
   private handleConnection(socket: AuthenticatedSocket): void {
     const userId = socket.userId!;
     const userName = socket.user?.name || 'Usuário';
-    
+
     logger.info(`Usuário ${userName} (${userId}) conectado via WebSocket`);
-    
+
     // Armazenar conexão
     this.connectedUsers.set(userId, socket.id);
-    
+
     // Juntar usuário ao seu room pessoal
     socket.join(`user-${userId}`);
-    
+
     // Enviar confirmação de conexão
     socket.emit('connected', {
       message: 'Conectado com sucesso',
       userId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Manipular eventos do cliente
     this.setupClientEventHandlers(socket);
 
     // Manipular desconexão
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', reason => {
       logger.info(`Usuário ${userName} (${userId}) desconectado: ${reason}`);
       this.connectedUsers.delete(userId);
     });
@@ -132,13 +139,13 @@ class SocketService {
         const userAlerts = await prisma.alert.findMany({
           where: {
             id: { in: alertIds },
-            userId
+            userId,
           },
-          select: { id: true }
+          select: { id: true },
         });
 
         const validAlertIds = userAlerts.map(alert => alert.id);
-        
+
         // Juntar aos rooms dos alertas
         validAlertIds.forEach(alertId => {
           socket.join(`alert-${alertId}`);
@@ -146,10 +153,12 @@ class SocketService {
 
         socket.emit('alerts-subscribed', {
           subscribedAlerts: validAlertIds,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
-        logger.info(`Usuário ${userId} subscrito a ${validAlertIds.length} alertas`);
+        logger.info(
+          `Usuário ${userId} subscrito a ${validAlertIds.length} alertas`
+        );
       } catch (error) {
         logger.error('Erro ao subscrever alertas:', error);
         socket.emit('error', { message: 'Erro ao subscrever alertas' });
@@ -164,10 +173,12 @@ class SocketService {
 
       socket.emit('alerts-unsubscribed', {
         unsubscribedAlerts: alertIds,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
-      logger.info(`Usuário ${userId} dessubscrito de ${alertIds.length} alertas`);
+      logger.info(
+        `Usuário ${userId} dessubscrito de ${alertIds.length} alertas`
+      );
     });
 
     // Buscar status de voos em tempo real
@@ -175,7 +186,7 @@ class SocketService {
       socket.join(`flight-${flightId}`);
       socket.emit('flight-tracking-started', {
         flightId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       logger.info(`Usuário ${userId} rastreando voo ${flightId}`);
@@ -186,7 +197,7 @@ class SocketService {
       socket.leave(`flight-${flightId}`);
       socket.emit('flight-tracking-stopped', {
         flightId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       logger.info(`Usuário ${userId} parou de rastrear voo ${flightId}`);
@@ -202,7 +213,9 @@ class SocketService {
   sendFlightAlert(userId: string, alert: FlightAlert): void {
     try {
       this.io.to(`user-${userId}`).emit('flight-alert', alert);
-      logger.info(`Alerta de voo enviado para usuário ${userId}: ${alert.title}`);
+      logger.info(
+        `Alerta de voo enviado para usuário ${userId}: ${alert.title}`
+      );
     } catch (error) {
       logger.error('Erro ao enviar alerta de voo:', error);
     }
@@ -212,7 +225,9 @@ class SocketService {
   sendPriceUpdate(flightId: string, priceUpdate: PriceUpdate): void {
     try {
       this.io.to(`flight-${flightId}`).emit('price-update', priceUpdate);
-      logger.info(`Atualização de preço enviada para voo ${flightId}: ${priceUpdate.oldPrice} -> ${priceUpdate.newPrice}`);
+      logger.info(
+        `Atualização de preço enviada para voo ${flightId}: ${priceUpdate.oldPrice} -> ${priceUpdate.newPrice}`
+      );
     } catch (error) {
       logger.error('Erro ao enviar atualização de preço:', error);
     }
@@ -223,7 +238,7 @@ class SocketService {
     try {
       this.io.to(`user-${userId}`).emit('notification', {
         ...notification,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       logger.info(`Notificação enviada para usuário ${userId}`);
     } catch (error) {
@@ -236,7 +251,7 @@ class SocketService {
     try {
       this.io.emit(event, {
         ...data,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       logger.info(`Broadcast enviado: ${event}`);
     } catch (error) {
@@ -249,7 +264,7 @@ class SocketService {
     try {
       this.io.to(room).emit(event, {
         ...data,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       logger.info(`Mensagem enviada para room ${room}: ${event}`);
     } catch (error) {
@@ -279,7 +294,9 @@ class SocketService {
       const socket = this.io.sockets.sockets.get(socketId);
       if (socket) {
         socket.disconnect(true);
-        logger.info(`Usuário ${userId} desconectado forçadamente: ${reason || 'Sem motivo especificado'}`);
+        logger.info(
+          `Usuário ${userId} desconectado forçadamente: ${reason || 'Sem motivo especificado'}`
+        );
       }
     }
   }

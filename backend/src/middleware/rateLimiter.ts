@@ -34,7 +34,7 @@ export const rateLimiterMiddleware = async (
     res.set('Retry-After', String(secs));
     res.status(429).json({
       error: 'Muitas requisições. Tente novamente em alguns segundos.',
-      retryAfter: secs
+      retryAfter: secs,
     });
   }
 };
@@ -53,7 +53,7 @@ export const searchRateLimiterMiddleware = async (
     res.set('Retry-After', String(secs));
     res.status(429).json({
       error: 'Limite de buscas excedido. Tente novamente em alguns minutos.',
-      retryAfter: secs
+      retryAfter: secs,
     });
   }
 };

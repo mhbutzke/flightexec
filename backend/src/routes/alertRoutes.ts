@@ -6,12 +6,13 @@ import {
   validateRequest,
   validatePagination,
   validateAirportCodes,
-  validateFlightClass
+  validateFlightClass,
 } from '../middleware/validation';
 import {
   generalRateLimit,
-  alertCreationRateLimit
+  alertCreationRateLimit,
 } from '../middleware/rateLimitMiddleware';
+import { sanitizeTextFields } from '../middleware/sanitization';
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.use(authenticateToken);
 router.post(
   '/',
   alertCreationRateLimit,
+  sanitizeTextFields(['name', 'notificationEmail']),
   [
     body('name')
       .notEmpty()
@@ -73,7 +75,7 @@ router.post(
     body('notificationWhatsapp')
       .optional()
       .isMobilePhone('pt-BR')
-      .withMessage('WhatsApp deve ser um número válido')
+      .withMessage('WhatsApp deve ser um número válido'),
   ],
   validateRequest,
   validateAirportCodes,
@@ -97,7 +99,7 @@ router.get(
     query('limit')
       .optional()
       .isInt({ min: 1, max: 100 })
-      .withMessage('Limite deve ser entre 1 e 100')
+      .withMessage('Limite deve ser entre 1 e 100'),
   ],
   validateRequest,
   validatePagination,
@@ -110,7 +112,7 @@ router.get(
   [
     param('alertId')
       .isUUID()
-      .withMessage('ID do alerta deve ser um UUID válido')
+      .withMessage('ID do alerta deve ser um UUID válido'),
   ],
   validateRequest,
   alertController.getAlert
@@ -120,6 +122,7 @@ router.get(
 router.put(
   '/:alertId',
   alertCreationRateLimit,
+  sanitizeTextFields(['name', 'notificationEmail']),
   [
     param('alertId')
       .isUUID()
@@ -171,7 +174,7 @@ router.put(
     body('notificationWhatsapp')
       .optional()
       .isMobilePhone('pt-BR')
-      .withMessage('WhatsApp deve ser um número válido')
+      .withMessage('WhatsApp deve ser um número válido'),
   ],
   validateRequest,
   validateAirportCodes,
@@ -185,7 +188,7 @@ router.delete(
   [
     param('alertId')
       .isUUID()
-      .withMessage('ID do alerta deve ser um UUID válido')
+      .withMessage('ID do alerta deve ser um UUID válido'),
   ],
   validateRequest,
   alertController.deleteAlert
@@ -197,7 +200,7 @@ router.post(
   [
     param('alertId')
       .isUUID()
-      .withMessage('ID do alerta deve ser um UUID válido')
+      .withMessage('ID do alerta deve ser um UUID válido'),
   ],
   validateRequest,
   alertController.testAlert
@@ -209,16 +212,13 @@ router.patch(
   [
     param('alertId')
       .isUUID()
-      .withMessage('ID do alerta deve ser um UUID válido')
+      .withMessage('ID do alerta deve ser um UUID válido'),
   ],
   validateRequest,
   alertController.updateAlert
 );
 
 // Obter estatísticas dos alertas do usuário
-router.get(
-  '/stats/summary',
-  alertController.getAlertStats
-);
+router.get('/stats/summary', alertController.getAlertStats);
 
 export default router;

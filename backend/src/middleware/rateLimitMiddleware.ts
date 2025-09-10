@@ -19,7 +19,7 @@ const defaultOptions: Required<Omit<RateLimitOptions, 'keyGenerator'>> = {
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
-  skipFailedRequests: false
+  skipFailedRequests: false,
 };
 
 // Gerador de chave padrão baseado no IP
@@ -43,82 +43,88 @@ export const endpointBasedKeyGenerator = (req: Request): string => {
   return `${baseKey}:${endpoint}`;
 };
 
-export function createRateLimit(options: RateLimitOptions = {}): (req: Request, res: Response, next: NextFunction) => void {
+export function createRateLimit(
+  options: RateLimitOptions = {}
+): (req: Request, res: Response, next: NextFunction) => void {
   const config = { ...defaultOptions, ...options };
   const keyGenerator = options.keyGenerator || defaultKeyGenerator;
 
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const key = keyGenerator(req);
-      
-      cacheService.checkRateLimit(
-        key,
-        config.maxRequests,
-        config.windowMs
-      ).then(rateLimitResult => {
 
-        // Adiciona headers de rate limit
-        if (config.standardHeaders) {
-          res.set({
-            'RateLimit-Limit': config.maxRequests.toString(),
-            'RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString()
-          });
-        }
+      cacheService
+        .checkRateLimit(key, config.maxRequests, config.windowMs)
+        .then(rateLimitResult => {
+          // Adiciona headers de rate limit
+          if (config.standardHeaders) {
+            res.set({
+              'RateLimit-Limit': config.maxRequests.toString(),
+              'RateLimit-Remaining': rateLimitResult.remaining.toString(),
+              'RateLimit-Reset': new Date(
+                rateLimitResult.resetTime
+              ).toISOString(),
+            });
+          }
 
-        if (config.legacyHeaders) {
-          res.set({
-            'X-RateLimit-Limit': config.maxRequests.toString(),
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime / 1000).toString()
-          });
-        }
+          if (config.legacyHeaders) {
+            res.set({
+              'X-RateLimit-Limit': config.maxRequests.toString(),
+              'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+              'X-RateLimit-Reset': Math.ceil(
+                rateLimitResult.resetTime / 1000
+              ).toString(),
+            });
+          }
 
-        if (!rateLimitResult.allowed) {
-          const retryAfter = Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000);
-          
-          res.set({
-            'Retry-After': retryAfter.toString()
-          });
+          if (!rateLimitResult.allowed) {
+            const retryAfter = Math.ceil(
+              (rateLimitResult.resetTime - Date.now()) / 1000
+            );
 
-          res.status(429).json({
-            error: 'Too Many Requests',
-            message: config.message,
-            retryAfter: retryAfter
-          });
-          return;
-        }
+            res.set({
+              'Retry-After': retryAfter.toString(),
+            });
 
-        // Middleware para contar apenas requisições bem-sucedidas/com falha
-        if (config.skipSuccessfulRequests || config.skipFailedRequests) {
-          const originalSend = res.send;
-          res.send = function(body) {
-            const statusCode = res.statusCode;
-            const isSuccess = statusCode >= 200 && statusCode < 300;
-            const isError = statusCode >= 400;
+            res.status(429).json({
+              error: 'Too Many Requests',
+              message: config.message,
+              retryAfter: retryAfter,
+            });
+            return;
+          }
 
-            // Se deve pular requisições bem-sucedidas e esta é bem-sucedida
-            if (config.skipSuccessfulRequests && isSuccess) {
-              // Reverter o contador (implementação simplificada)
-              console.log('Skipping successful request for rate limit');
-            }
+          // Middleware para contar apenas requisições bem-sucedidas/com falha
+          if (config.skipSuccessfulRequests || config.skipFailedRequests) {
+            const originalSend = res.send;
+            res.send = function (body) {
+              const statusCode = res.statusCode;
+              const isSuccess = statusCode >= 200 && statusCode < 300;
+              const isError = statusCode >= 400;
 
-            // Se deve pular requisições com erro e esta tem erro
-            if (config.skipFailedRequests && isError) {
-              // Reverter o contador (implementação simplificada)
-              console.log('Skipping failed request for rate limit');
-            }
+              // Se deve pular requisições bem-sucedidas e esta é bem-sucedida
+              if (config.skipSuccessfulRequests && isSuccess) {
+                // Reverter o contador (implementação simplificada)
+                console.log('Skipping successful request for rate limit');
+              }
 
-            return originalSend.call(this, body);
-          };
-        }
+              // Se deve pular requisições com erro e esta tem erro
+              if (config.skipFailedRequests && isError) {
+                // Reverter o contador (implementação simplificada)
+                console.log('Skipping failed request for rate limit');
+              }
 
-        next();
-      }).catch(error => {
-        console.error('Rate limit middleware error:', error);
-        // Em caso de erro, permite a requisição continuar
-        next();
-      });
+              return originalSend.call(this, body);
+            };
+          }
+
+          next();
+        })
+        .catch(error => {
+          console.error('Rate limit middleware error:', error);
+          // Em caso de erro, permite a requisição continuar
+          next();
+        });
     } catch (error) {
       console.error('Rate limit middleware error:', error);
       // Em caso de erro, permite a requisição continuar
@@ -133,7 +139,7 @@ export function createRateLimit(options: RateLimitOptions = {}): (req: Request, 
 export const generalRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   maxRequests: 100,
-  message: 'Muitas requisições. Tente novamente em 15 minutos.'
+  message: 'Muitas requisições. Tente novamente em 15 minutos.',
 });
 
 // Rate limit para APIs de busca de voos (mais restritivo)
@@ -141,7 +147,7 @@ export const flightSearchRateLimit = createRateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutos
   maxRequests: 20,
   message: 'Muitas buscas de voos. Tente novamente em 5 minutos.',
-  keyGenerator: endpointBasedKeyGenerator
+  keyGenerator: endpointBasedKeyGenerator,
 });
 
 // Rate limit para autenticação (muito restritivo)
@@ -149,7 +155,7 @@ export const authRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   maxRequests: 5,
   message: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
-  skipSuccessfulRequests: true // Não conta logins bem-sucedidos
+  skipSuccessfulRequests: true, // Não conta logins bem-sucedidos
 });
 
 // Rate limit para usuários autenticados (mais permissivo)
@@ -157,7 +163,7 @@ export const authenticatedUserRateLimit = createRateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   maxRequests: 200,
   message: 'Limite de requisições excedido. Tente novamente em 15 minutos.',
-  keyGenerator: userBasedKeyGenerator
+  keyGenerator: userBasedKeyGenerator,
 });
 
 // Rate limit para criação de alertas
@@ -165,7 +171,7 @@ export const alertCreationRateLimit = createRateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
   maxRequests: 10,
   message: 'Muitos alertas criados. Tente novamente em 1 hora.',
-  keyGenerator: userBasedKeyGenerator
+  keyGenerator: userBasedKeyGenerator,
 });
 
 export default {
@@ -174,5 +180,5 @@ export default {
   flightSearchRateLimit,
   authRateLimit,
   authenticatedUserRateLimit,
-  alertCreationRateLimit
+  alertCreationRateLimit,
 };

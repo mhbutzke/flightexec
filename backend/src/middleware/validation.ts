@@ -9,24 +9,24 @@ export const validateRequest = (
   next: NextFunction
 ): void => {
   const errors = validationResult(req);
-  
+
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map((error: ValidationError) => ({
       field: error.type === 'field' ? (error as any).path : 'unknown',
       message: error.msg,
-      value: error.type === 'field' ? (error as any).value : undefined
+      value: error.type === 'field' ? (error as any).value : undefined,
     }));
 
     logger.debug('Erro de validação:', {
       path: req.path,
       method: req.method,
-      errors: errorMessages
+      errors: errorMessages,
     });
 
     res.status(400).json({
       success: false,
       message: 'Dados de entrada inválidos',
-      errors: errorMessages
+      errors: errorMessages,
     });
     return;
   }
@@ -48,14 +48,14 @@ export const validatePagination = (
     if (isNaN(pageNum) || pageNum < 1) {
       res.status(400).json({
         success: false,
-        message: 'Parâmetro "page" deve ser um número inteiro maior que 0'
+        message: 'Parâmetro "page" deve ser um número inteiro maior que 0',
       });
       return;
     }
     if (pageNum > 1000) {
       res.status(400).json({
         success: false,
-        message: 'Parâmetro "page" não pode ser maior que 1000'
+        message: 'Parâmetro "page" não pode ser maior que 1000',
       });
       return;
     }
@@ -67,14 +67,14 @@ export const validatePagination = (
     if (isNaN(limitNum) || limitNum < 1) {
       res.status(400).json({
         success: false,
-        message: 'Parâmetro "limit" deve ser um número inteiro maior que 0'
+        message: 'Parâmetro "limit" deve ser um número inteiro maior que 0',
       });
       return;
     }
     if (limitNum > 100) {
       res.status(400).json({
         success: false,
-        message: 'Parâmetro "limit" não pode ser maior que 100'
+        message: 'Parâmetro "limit" não pode ser maior que 100',
       });
       return;
     }
@@ -96,7 +96,7 @@ export const validateDateRange = (
     if (isNaN(depDate.getTime())) {
       res.status(400).json({
         success: false,
-        message: 'Data de partida inválida'
+        message: 'Data de partida inválida',
       });
       return;
     }
@@ -107,7 +107,7 @@ export const validateDateRange = (
     if (depDate < yesterday) {
       res.status(400).json({
         success: false,
-        message: 'Data de partida não pode ser no passado'
+        message: 'Data de partida não pode ser no passado',
       });
       return;
     }
@@ -118,7 +118,7 @@ export const validateDateRange = (
     if (depDate > oneYearFromNow) {
       res.status(400).json({
         success: false,
-        message: 'Data de partida não pode ser mais de 1 ano no futuro'
+        message: 'Data de partida não pode ser mais de 1 ano no futuro',
       });
       return;
     }
@@ -129,7 +129,7 @@ export const validateDateRange = (
     if (isNaN(retDate.getTime())) {
       res.status(400).json({
         success: false,
-        message: 'Data de retorno inválida'
+        message: 'Data de retorno inválida',
       });
       return;
     }
@@ -139,7 +139,7 @@ export const validateDateRange = (
       if (retDate <= depDate) {
         res.status(400).json({
           success: false,
-          message: 'Data de retorno deve ser posterior à data de partida'
+          message: 'Data de retorno deve ser posterior à data de partida',
         });
         return;
       }
@@ -162,7 +162,7 @@ export const validateAirportCodes = (
     if (!/^[A-Z]{3}$/.test(originCode)) {
       res.status(400).json({
         success: false,
-        message: 'Código do aeroporto de origem deve ter 3 letras (ex: GRU)'
+        message: 'Código do aeroporto de origem deve ter 3 letras (ex: GRU)',
       });
       return;
     }
@@ -173,7 +173,7 @@ export const validateAirportCodes = (
     if (!/^[A-Z]{3}$/.test(destCode)) {
       res.status(400).json({
         success: false,
-        message: 'Código do aeroporto de destino deve ter 3 letras (ex: GIG)'
+        message: 'Código do aeroporto de destino deve ter 3 letras (ex: GIG)',
       });
       return;
     }
@@ -182,7 +182,7 @@ export const validateAirportCodes = (
   if (origin && destination && origin === destination) {
     res.status(400).json({
       success: false,
-      message: 'Aeroporto de origem e destino devem ser diferentes'
+      message: 'Aeroporto de origem e destino devem ser diferentes',
     });
     return;
   }
@@ -203,14 +203,14 @@ export const validatePassengers = (
     if (isNaN(passengersNum) || passengersNum < 1) {
       res.status(400).json({
         success: false,
-        message: 'Número de passageiros deve ser um número inteiro maior que 0'
+        message: 'Número de passageiros deve ser um número inteiro maior que 0',
       });
       return;
     }
     if (passengersNum > 9) {
       res.status(400).json({
         success: false,
-        message: 'Número máximo de passageiros é 9'
+        message: 'Número máximo de passageiros é 9',
       });
       return;
     }
@@ -232,7 +232,7 @@ export const validateFlightClass = (
     if (!validClasses.includes(classType as string)) {
       res.status(400).json({
         success: false,
-        message: 'Classe de voo deve ser: business, economy ou both'
+        message: 'Classe de voo deve ser: business, economy ou both',
       });
       return;
     }
@@ -247,5 +247,5 @@ export default {
   validateDateRange,
   validateAirportCodes,
   validatePassengers,
-  validateFlightClass
+  validateFlightClass,
 };

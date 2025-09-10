@@ -23,41 +23,37 @@ export const logger = winston.createLogger({
         colorize(),
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         consoleFormat
-      )
+      ),
     }),
-    
+
     // Write error logs to file
-    new winston.transports.File({ 
-      filename: 'logs/error.log', 
+    new winston.transports.File({
+      filename: 'logs/error.log',
       level: 'error',
-      format: combine(
-        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        json()
-      )
+      format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), json()),
     }),
-    
+
     // Write all logs to file
-    new winston.transports.File({ 
+    new winston.transports.File({
       filename: 'logs/combined.log',
-      format: combine(
-        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        json()
-      )
-    })
+      format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), json()),
+    }),
   ],
 });
 
 // If we're not in production, log to the console with simple format
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: combine(
-      colorize(),
-      timestamp({ format: 'HH:mm:ss' }),
-      printf(({ level, message, timestamp }) => {
-        return `${timestamp} [${level}]: ${message}`;
-      })
-    )
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: combine(
+        colorize(),
+        timestamp({ format: 'HH:mm:ss' }),
+        printf(({ level, message, timestamp }) => {
+          return `${timestamp} [${level}]: ${message}`;
+        })
+      ),
+    })
+  );
 }
 
 export default logger;

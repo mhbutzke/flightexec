@@ -42,17 +42,17 @@ class AlertService {
         where: {
           isActive: true,
           user: {
-            isActive: true
-          }
+            isActive: true,
+          },
         },
         include: {
-          user: true
-        }
+          user: true,
+        },
       });
 
       logger.info(`Verificando ${activeAlerts.length} alertas ativos`);
 
-      const alertPromises = activeAlerts.map(alert => 
+      const alertPromises = activeAlerts.map(alert =>
         this.checkSingleAlert(alert).catch(error => {
           logger.error(`Erro ao verificar alerta ${alert.id}:`, error);
         })
@@ -73,18 +73,23 @@ class AlertService {
       const searchParams: FlightSearchParams = {
         origin: alert.departureCode,
         destination: alert.arrivalCode,
-        departureDate: alert.departureDate?.toISOString() || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        departureDate:
+          alert.departureDate?.toISOString() ||
+          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         returnDate: alert.returnDate?.toISOString(),
         passengers: 1,
-        classType: alert.classType as 'business' | 'economy' | 'both'
+        classType: alert.classType as 'business' | 'economy' | 'both',
       };
 
       const searchResult = await flightService.searchAllFlights(searchParams);
-      const relevantFlights = this.filterFlightsByAlert(searchResult.flights, alert);
+      const relevantFlights = this.filterFlightsByAlert(
+        searchResult.flights,
+        alert
+      );
 
       if (relevantFlights.length > 0) {
         const triggers = this.evaluateAlertTriggers(relevantFlights, alert);
-        
+
         for (const trigger of triggers) {
           await this.triggerAlert(trigger);
         }
@@ -92,7 +97,7 @@ class AlertService {
         // Atualizar último trigger
         await prisma.alert.update({
           where: { id: alert.id },
-          data: { lastTriggered: new Date() }
+          data: { lastTriggered: new Date() },
         });
       }
     } catch (error) {
@@ -143,7 +148,10 @@ class AlertService {
     const minInterval = 60 * 60 * 1000; // 1 hora mínima entre alertas
 
     // Verificar se passou tempo suficiente desde o último alerta
-    if (lastTriggered && (now.getTime() - lastTriggered.getTime()) < minInterval) {
+    if (
+      lastTriggered &&
+      now.getTime() - lastTriggered.getTime() < minInterval
+    ) {
       return triggers;
     }
 
@@ -169,7 +177,7 @@ class AlertService {
         alertId: alert.id,
         userId: alert.userId,
         flightData: flight,
-        triggerType
+        triggerType,
       });
     }
 
@@ -181,7 +189,7 @@ class AlertService {
     try {
       const alert = await prisma.alert.findUnique({
         where: { id: trigger.alertId },
-        include: { user: true }
+        include: { user: true },
       });
 
       if (!alert) {
@@ -196,8 +204,8 @@ class AlertService {
           title: this.generateNotificationTitle(trigger),
           message: this.generateNotificationMessage(trigger),
           type: 'system',
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       });
 
       // Enviar notificação por email
@@ -207,15 +215,15 @@ class AlertService {
           userName: alert.user.name,
           alertName: alert.name,
           flightData: trigger.flightData,
-          triggerType: trigger.triggerType
+          triggerType: trigger.triggerType,
         });
 
         await prisma.notification.update({
           where: { id: notification.id },
-          data: { 
+          data: {
             status: 'sent',
-            sentAt: new Date()
-          }
+            sentAt: new Date(),
+          },
         });
       }
 
@@ -227,11 +235,13 @@ class AlertService {
           message: notification.message,
           flightData: trigger.flightData,
           triggerType: trigger.triggerType,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
-      logger.info(`Alerta disparado: ${trigger.alertId} para usuário ${trigger.userId}`);
+      logger.info(
+        `Alerta disparado: ${trigger.alertId} para usuário ${trigger.userId}`
+      );
     } catch (error) {
       logger.error('Erro ao disparar alerta:', error);
     }
@@ -240,7 +250,7 @@ class AlertService {
   // Gerar título da notificação
   private generateNotificationTitle(trigger: AlertTrigger): string {
     const flight = trigger.flightData;
-    
+
     switch (trigger.triggerType) {
       case 'price_drop':
         return `💰 Preço Reduzido: ${flight.origin} → ${flight.destination}`;
@@ -258,30 +268,37 @@ class AlertService {
     const flight = trigger.flightData;
     const price = new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: flight.currency
+      currency: flight.currency,
     }).format(flight.price);
 
-    const departureDate = new Date(flight.departureTime).toLocaleDateString('pt-BR');
-    const departureTime = new Date(flight.departureTime).toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const departureDate = new Date(flight.departureTime).toLocaleDateString(
+      'pt-BR'
+    );
+    const departureTime = new Date(flight.departureTime).toLocaleTimeString(
+      'pt-BR',
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+      }
+    );
 
-    return `${flight.airline} ${flight.flightNumber} - ${price} em classe executiva\n` +
-           `Partida: ${departureDate} às ${departureTime}\n` +
-           `Duração: ${Math.floor(flight.duration / 60)}h${flight.duration % 60}m\n` +
-           `Paradas: ${flight.stops === 0 ? 'Direto' : `${flight.stops} parada(s)`}\n` +
-           `Vagas disponíveis: ${flight.availableSeats}`;
+    return (
+      `${flight.airline} ${flight.flightNumber} - ${price} em classe executiva\n` +
+      `Partida: ${departureDate} às ${departureTime}\n` +
+      `Duração: ${Math.floor(flight.duration / 60)}h${flight.duration % 60}m\n` +
+      `Paradas: ${flight.stops === 0 ? 'Direto' : `${flight.stops} parada(s)`}\n` +
+      `Vagas disponíveis: ${flight.availableSeats}`
+    );
   }
 
   // Obter código da companhia aérea
   private getAirlineCode(airlineName: string): string {
     const codes: { [key: string]: string } = {
-      'LATAM': 'LA',
-      'GOL': 'G3',
-      'Azul': 'AD',
-      'TAP': 'TP',
-      'Air France': 'AF'
+      LATAM: 'LA',
+      GOL: 'G3',
+      Azul: 'AD',
+      TAP: 'TP',
+      'Air France': 'AF',
     };
 
     return codes[airlineName] || airlineName.substring(0, 2).toUpperCase();
@@ -296,8 +313,12 @@ class AlertService {
           name: alertData.name,
           departureCode: alertData.departureCode,
           arrivalCode: alertData.arrivalCode,
-          departureDate: alertData.departureDate ? new Date(alertData.departureDate) : null,
-          returnDate: alertData.returnDate ? new Date(alertData.returnDate) : null,
+          departureDate: alertData.departureDate
+            ? new Date(alertData.departureDate)
+            : null,
+          returnDate: alertData.returnDate
+            ? new Date(alertData.returnDate)
+            : null,
           maxPrice: alertData.maxPrice,
           minPrice: alertData.minPrice,
           currency: alertData.currency || 'BRL',
@@ -305,8 +326,8 @@ class AlertService {
           maxStops: alertData.maxStops,
           preferredAirlines: alertData.preferredAirlines || [],
           emailNotification: alertData.emailNotification !== false,
-          pushNotification: alertData.pushNotification !== false
-        }
+          pushNotification: alertData.pushNotification !== false,
+        },
       });
 
       logger.info(`Novo alerta criado: ${alert.id} para usuário ${userId}`);
@@ -318,17 +339,21 @@ class AlertService {
   }
 
   // Atualizar alerta
-  async updateAlert(alertId: string, userId: string, updateData: any): Promise<any> {
+  async updateAlert(
+    alertId: string,
+    userId: string,
+    updateData: any
+  ): Promise<any> {
     try {
       const alert = await prisma.alert.update({
         where: {
           id: alertId,
-          userId // Garantir que o usuário só pode atualizar seus próprios alertas
+          userId, // Garantir que o usuário só pode atualizar seus próprios alertas
         },
         data: {
           ...updateData,
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       });
 
       logger.info(`Alerta atualizado: ${alertId}`);
@@ -345,8 +370,8 @@ class AlertService {
       await prisma.alert.delete({
         where: {
           id: alertId,
-          userId
-        }
+          userId,
+        },
       });
 
       logger.info(`Alerta deletado: ${alertId}`);
@@ -365,9 +390,9 @@ class AlertService {
         include: {
           notifications: {
             orderBy: { createdAt: 'desc' },
-            take: 5
-          }
-        }
+            take: 5,
+          },
+        },
       });
 
       return alerts;

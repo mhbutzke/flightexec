@@ -8,7 +8,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     // TODO: Implementar listagem de alertas
     res.json({
-      message: 'Listagem de alertas - em desenvolvimento'
+      message: 'Listagem de alertas - em desenvolvimento',
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -21,7 +21,7 @@ router.post('/', async (req: Request, res: Response) => {
     // TODO: Implementar criação de alerta
     res.json({
       message: 'Criação de alerta - em desenvolvimento',
-      body: req.body
+      body: req.body,
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -34,7 +34,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     // TODO: Implementar atualização de alerta
     res.json({
-      message: `Atualização do alerta ${id} - em desenvolvimento`
+      message: `Atualização do alerta ${id} - em desenvolvimento`,
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -47,7 +47,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     // TODO: Implementar exclusão de alerta
     res.json({
-      message: `Exclusão do alerta ${id} - em desenvolvimento`
+      message: `Exclusão do alerta ${id} - em desenvolvimento`,
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });

@@ -12,7 +12,7 @@ router.get('/health', (req, res) => {
     success: true,
     message: 'FlightExec API está funcionando',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
   });
 });
 
@@ -27,7 +27,7 @@ router.use('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'Endpoint não encontrado',
-    path: req.originalUrl
+    path: req.originalUrl,
   });
 });
 

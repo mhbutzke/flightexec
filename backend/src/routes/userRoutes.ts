@@ -2,10 +2,7 @@ import { Router, Request, Response } from 'express';
 import { body, query } from 'express-validator';
 import * as authController from '../controllers/authController';
 import { authenticateToken } from '../middleware/auth';
-import {
-  validateRequest,
-  validatePagination
-} from '../middleware/validation';
+import { validateRequest, validatePagination } from '../middleware/validation';
 
 const router = Router();
 
@@ -13,10 +10,7 @@ const router = Router();
 router.use(authenticateToken);
 
 // Obter perfil do usuário
-router.get(
-  '/profile',
-  authController.getProfile
-);
+router.get('/profile', authController.getProfile);
 
 // Atualizar perfil do usuário
 router.put(
@@ -64,7 +58,7 @@ router.put(
     body('preferences.whatsappNotifications')
       .optional()
       .isBoolean()
-      .withMessage('Notificações WhatsApp devem ser verdadeiro ou falso')
+      .withMessage('Notificações WhatsApp devem ser verdadeiro ou falso'),
   ],
   validateRequest,
   authController.updateProfile
@@ -74,21 +68,22 @@ router.put(
 router.put(
   '/password',
   [
-    body('currentPassword')
-      .notEmpty()
-      .withMessage('Senha atual é obrigatória'),
+    body('currentPassword').notEmpty().withMessage('Senha atual é obrigatória'),
     body('newPassword')
       .isLength({ min: 8 })
       .withMessage('Nova senha deve ter pelo menos 8 caracteres')
-      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-      .withMessage('Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial'),
-    body('confirmPassword')
-      .custom((value, { req }) => {
-        if (value !== req.body.newPassword) {
-          throw new Error('Confirmação de senha não confere');
-        }
-        return true;
-      })
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
+      )
+      .withMessage(
+        'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial'
+      ),
+    body('confirmPassword').custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error('Confirmação de senha não confere');
+      }
+      return true;
+    }),
   ],
   validateRequest,
   authController.changePassword
@@ -104,7 +99,7 @@ router.delete(
     body('reason')
       .optional()
       .isLength({ max: 500 })
-      .withMessage('Motivo deve ter no máximo 500 caracteres')
+      .withMessage('Motivo deve ter no máximo 500 caracteres'),
   ],
   validateRequest,
   async (req: Request, res: Response) => {
@@ -113,78 +108,76 @@ router.delete(
       // Em uma implementação futura, você pode adicionar lógica específica
       (res as Response).status(501).json({
         success: false,
-        message: 'Funcionalidade de desativação de conta ainda não implementada'
+        message:
+          'Funcionalidade de desativação de conta ainda não implementada',
       });
     } catch (error) {
       (res as Response).status(500).json({
         success: false,
-        message: 'Erro interno do servidor'
+        message: 'Erro interno do servidor',
       });
     }
   }
 );
 
 // Obter estatísticas do usuário (buscas, alertas, etc.)
-router.get(
-  '/stats',
-  async (req, res) => {
-    try {
-      const authReq = req as any;
-      const userId = authReq.user?.id;
+router.get('/stats', async (req, res) => {
+  try {
+    const authReq = req as any;
+    const userId = authReq.user?.id;
 
-      if (!userId) {
-        res.status(401).json({
-          success: false,
-          message: 'Usuário não autenticado'
-        });
-        return;
-      }
-
-      // Buscar estatísticas básicas
-      const [alertsCount, searchesCount, favoritesCount] = await Promise.all([
-        // Contar alertas do usuário
-        require('../config/database').prisma.alert.count({
-          where: { userId }
-        }),
-        // Contar buscas do usuário
-        require('../config/database').prisma.search.count({
-          where: { userId }
-        }),
-        // Contar favoritos do usuário
-        require('../config/database').prisma.favorite.count({
-          where: { userId }
-        })
-      ]);
-
-      res.json({
-        success: true,
-        data: {
-          alerts: {
-            total: alertsCount,
-            active: 0, // TODO: implementar contagem de alertas ativos
-            triggered: 0 // TODO: implementar contagem de alertas disparados
-          },
-          searches: {
-            total: searchesCount,
-            thisMonth: 0 // TODO: implementar contagem de buscas do mês
-          },
-          favorites: {
-            total: favoritesCount
-          },
-          account: {
-            memberSince: authReq.user?.createdAt || new Date(),
-            lastLogin: new Date() // TODO: implementar tracking de último login
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Erro ao obter estatísticas do usuário:', error);
-      res.status(500).json({
+    if (!userId) {
+      res.status(401).json({
         success: false,
-        message: 'Erro interno do servidor'
+        message: 'Usuário não autenticado',
       });
+      return;
     }
+
+    // Buscar estatísticas básicas
+    const [alertsCount, searchesCount, favoritesCount] = await Promise.all([
+      // Contar alertas do usuário
+      require('../config/database').prisma.alert.count({
+        where: { userId },
+      }),
+      // Contar buscas do usuário
+      require('../config/database').prisma.search.count({
+        where: { userId },
+      }),
+      // Contar favoritos do usuário
+      require('../config/database').prisma.favorite.count({
+        where: { userId },
+      }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        alerts: {
+          total: alertsCount,
+          active: 0, // TODO: implementar contagem de alertas ativos
+          triggered: 0, // TODO: implementar contagem de alertas disparados
+        },
+        searches: {
+          total: searchesCount,
+          thisMonth: 0, // TODO: implementar contagem de buscas do mês
+        },
+        favorites: {
+          total: favoritesCount,
+        },
+        account: {
+          memberSince: authReq.user?.createdAt || new Date(),
+          lastLogin: new Date(), // TODO: implementar tracking de último login
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Erro ao obter estatísticas do usuário:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno do servidor',
+    });
   }
-);
+});
 
 export default router;

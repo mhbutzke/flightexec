@@ -12,13 +12,16 @@ interface AuthenticatedRequest extends Request {
 }
 
 // Criar novo alerta
-export const createAlert = async (req: Request, res: Response): Promise<void> => {
+export const createAlert = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não autenticado'
+        message: 'Usuário não autenticado',
       });
       return;
     }
@@ -35,14 +38,14 @@ export const createAlert = async (req: Request, res: Response): Promise<void> =>
       maxStops,
       preferredAirlines = [],
       emailNotification = true,
-      pushNotification = true
+      pushNotification = true,
     } = req.body;
 
     // Validação básica
     if (!name || !departureCode || !arrivalCode) {
       res.status(400).json({
         success: false,
-        message: 'Nome, código de origem e destino são obrigatórios'
+        message: 'Nome, código de origem e destino são obrigatórios',
       });
       return;
     }
@@ -50,13 +53,13 @@ export const createAlert = async (req: Request, res: Response): Promise<void> =>
     // Verificar se os aeroportos existem
     const [departureAirport, arrivalAirport] = await Promise.all([
       prisma.airport.findUnique({ where: { code: departureCode } }),
-      prisma.airport.findUnique({ where: { code: arrivalCode } })
+      prisma.airport.findUnique({ where: { code: arrivalCode } }),
     ]);
 
     if (!departureAirport || !arrivalAirport) {
       res.status(400).json({
         success: false,
-        message: 'Aeroporto de origem ou destino não encontrado'
+        message: 'Aeroporto de origem ou destino não encontrado',
       });
       return;
     }
@@ -76,17 +79,17 @@ export const createAlert = async (req: Request, res: Response): Promise<void> =>
         maxStops,
         preferredAirlines,
         emailNotification,
-        pushNotification
+        pushNotification,
       },
       include: {
         user: {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     // Alerta criado e será verificado automaticamente pelo cron job
@@ -94,7 +97,7 @@ export const createAlert = async (req: Request, res: Response): Promise<void> =>
     res.status(201).json({
       success: true,
       data: alert,
-      message: 'Alerta criado com sucesso'
+      message: 'Alerta criado com sucesso',
     });
 
     logger.info(`Alerta criado: ${alert.id} para usuário ${authReq.user.id}`);
@@ -102,19 +105,22 @@ export const createAlert = async (req: Request, res: Response): Promise<void> =>
     logger.error('Erro ao criar alerta:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
 
 // Listar alertas do usuário
-export const getUserAlerts = async (req: Request, res: Response): Promise<void> => {
+export const getUserAlerts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não autenticado'
+        message: 'Usuário não autenticado',
       });
       return;
     }
@@ -123,7 +129,7 @@ export const getUserAlerts = async (req: Request, res: Response): Promise<void> 
     const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
 
     const where: any = {
-      userId: authReq.user.id
+      userId: authReq.user.id,
     };
 
     if (isActive !== undefined) {
@@ -136,18 +142,18 @@ export const getUserAlerts = async (req: Request, res: Response): Promise<void> 
         skip,
         take: parseInt(limit as string),
         orderBy: {
-          createdAt: 'desc'
+          createdAt: 'desc',
         },
         include: {
           notifications: {
             orderBy: {
-              createdAt: 'desc'
+              createdAt: 'desc',
             },
-            take: 5 // Últimas 5 notificações
-          }
-        }
+            take: 5, // Últimas 5 notificações
+          },
+        },
       }),
-      prisma.alert.count({ where })
+      prisma.alert.count({ where }),
     ]);
 
     res.json({
@@ -158,17 +164,19 @@ export const getUserAlerts = async (req: Request, res: Response): Promise<void> 
           page: parseInt(page as string),
           limit: parseInt(limit as string),
           total,
-          pages: Math.ceil(total / parseInt(limit as string))
-        }
-      }
+          pages: Math.ceil(total / parseInt(limit as string)),
+        },
+      },
     });
 
-    logger.debug(`Alertas listados para usuário ${authReq.user.id}: ${alerts.length} resultados`);
+    logger.debug(
+      `Alertas listados para usuário ${authReq.user.id}: ${alerts.length} resultados`
+    );
   } catch (error) {
     logger.error('Erro ao listar alertas:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
@@ -180,7 +188,7 @@ export const getAlert = async (req: Request, res: Response): Promise<void> => {
     if (!authReq.user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não autenticado'
+        message: 'Usuário não autenticado',
       });
       return;
     }
@@ -190,28 +198,28 @@ export const getAlert = async (req: Request, res: Response): Promise<void> => {
     const alert = await prisma.alert.findFirst({
       where: {
         id: alertId,
-        userId: authReq.user.id
+        userId: authReq.user.id,
       },
       include: {
         notifications: {
           orderBy: {
-            createdAt: 'desc'
-          }
-        }
-      }
+            createdAt: 'desc',
+          },
+        },
+      },
     });
 
     if (!alert) {
       res.status(404).json({
         success: false,
-        message: 'Alerta não encontrado'
+        message: 'Alerta não encontrado',
       });
       return;
     }
 
     res.json({
       success: true,
-      data: alert
+      data: alert,
     });
 
     logger.debug(`Detalhes do alerta ${alertId} consultados`);
@@ -219,19 +227,22 @@ export const getAlert = async (req: Request, res: Response): Promise<void> => {
     logger.error('Erro ao obter alerta:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
 
 // Atualizar alerta
-export const updateAlert = async (req: Request, res: Response): Promise<void> => {
+export const updateAlert = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não autenticado'
+        message: 'Usuário não autenticado',
       });
       return;
     }
@@ -243,34 +254,64 @@ export const updateAlert = async (req: Request, res: Response): Promise<void> =>
     const existingAlert = await prisma.alert.findFirst({
       where: {
         id: alertId,
-        userId: authReq.user.id
-      }
+        userId: authReq.user.id,
+      },
     });
 
     if (!existingAlert) {
       res.status(404).json({
         success: false,
-        message: 'Alerta não encontrado'
+        message: 'Alerta não encontrado',
       });
       return;
     }
 
     // Preparar dados para atualização
     const dataToUpdate: any = {};
-    
-    if (updateData.name) dataToUpdate.name = updateData.name;
-    if (updateData.departureCode) dataToUpdate.departureCode = updateData.departureCode;
-    if (updateData.arrivalCode) dataToUpdate.arrivalCode = updateData.arrivalCode;
-    if (updateData.departureDate) dataToUpdate.departureDate = new Date(updateData.departureDate);
-    if (updateData.returnDate) dataToUpdate.returnDate = new Date(updateData.returnDate);
-    if (updateData.maxPrice !== undefined) dataToUpdate.maxPrice = updateData.maxPrice ? parseFloat(updateData.maxPrice) : null;
-    if (updateData.minPrice !== undefined) dataToUpdate.minPrice = updateData.minPrice ? parseFloat(updateData.minPrice) : null;
-    if (updateData.classType) dataToUpdate.classType = updateData.classType;
-    if (updateData.maxStops !== undefined) dataToUpdate.maxStops = updateData.maxStops;
-    if (updateData.preferredAirlines) dataToUpdate.preferredAirlines = updateData.preferredAirlines;
-    if (updateData.emailNotification !== undefined) dataToUpdate.emailNotification = updateData.emailNotification;
-    if (updateData.pushNotification !== undefined) dataToUpdate.pushNotification = updateData.pushNotification;
-    if (updateData.isActive !== undefined) dataToUpdate.isActive = updateData.isActive;
+
+    if (updateData.name) {
+      dataToUpdate.name = updateData.name;
+    }
+    if (updateData.departureCode) {
+      dataToUpdate.departureCode = updateData.departureCode;
+    }
+    if (updateData.arrivalCode) {
+      dataToUpdate.arrivalCode = updateData.arrivalCode;
+    }
+    if (updateData.departureDate) {
+      dataToUpdate.departureDate = new Date(updateData.departureDate);
+    }
+    if (updateData.returnDate) {
+      dataToUpdate.returnDate = new Date(updateData.returnDate);
+    }
+    if (updateData.maxPrice !== undefined) {
+      dataToUpdate.maxPrice = updateData.maxPrice
+        ? parseFloat(updateData.maxPrice)
+        : null;
+    }
+    if (updateData.minPrice !== undefined) {
+      dataToUpdate.minPrice = updateData.minPrice
+        ? parseFloat(updateData.minPrice)
+        : null;
+    }
+    if (updateData.classType) {
+      dataToUpdate.classType = updateData.classType;
+    }
+    if (updateData.maxStops !== undefined) {
+      dataToUpdate.maxStops = updateData.maxStops;
+    }
+    if (updateData.preferredAirlines) {
+      dataToUpdate.preferredAirlines = updateData.preferredAirlines;
+    }
+    if (updateData.emailNotification !== undefined) {
+      dataToUpdate.emailNotification = updateData.emailNotification;
+    }
+    if (updateData.pushNotification !== undefined) {
+      dataToUpdate.pushNotification = updateData.pushNotification;
+    }
+    if (updateData.isActive !== undefined) {
+      dataToUpdate.isActive = updateData.isActive;
+    }
 
     // Atualizar alerta
     const updatedAlert = await prisma.alert.update({
@@ -281,10 +322,10 @@ export const updateAlert = async (req: Request, res: Response): Promise<void> =>
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     // Alerta atualizado e será verificado automaticamente pelo cron job
@@ -292,7 +333,7 @@ export const updateAlert = async (req: Request, res: Response): Promise<void> =>
     res.json({
       success: true,
       data: updatedAlert,
-      message: 'Alerta atualizado com sucesso'
+      message: 'Alerta atualizado com sucesso',
     });
 
     logger.info(`Alerta ${alertId} atualizado`);
@@ -300,19 +341,22 @@ export const updateAlert = async (req: Request, res: Response): Promise<void> =>
     logger.error('Erro ao atualizar alerta:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
 
 // Deletar alerta
-export const deleteAlert = async (req: Request, res: Response): Promise<void> => {
+export const deleteAlert = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não autenticado'
+        message: 'Usuário não autenticado',
       });
       return;
     }
@@ -323,14 +367,14 @@ export const deleteAlert = async (req: Request, res: Response): Promise<void> =>
     const existingAlert = await prisma.alert.findFirst({
       where: {
         id: alertId,
-        userId: authReq.user.id
-      }
+        userId: authReq.user.id,
+      },
     });
 
     if (!existingAlert) {
       res.status(404).json({
         success: false,
-        message: 'Alerta não encontrado'
+        message: 'Alerta não encontrado',
       });
       return;
     }
@@ -339,12 +383,12 @@ export const deleteAlert = async (req: Request, res: Response): Promise<void> =>
 
     // Deletar alerta (cascade irá deletar notificações)
     await prisma.alert.delete({
-      where: { id: alertId }
+      where: { id: alertId },
     });
 
     res.json({
       success: true,
-      message: 'Alerta deletado com sucesso'
+      message: 'Alerta deletado com sucesso',
     });
 
     logger.info(`Alerta ${alertId} deletado`);
@@ -352,7 +396,7 @@ export const deleteAlert = async (req: Request, res: Response): Promise<void> =>
     logger.error('Erro ao deletar alerta:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
@@ -364,7 +408,7 @@ export const testAlert = async (req: Request, res: Response): Promise<void> => {
     if (!authReq.user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não autenticado'
+        message: 'Usuário não autenticado',
       });
       return;
     }
@@ -375,14 +419,14 @@ export const testAlert = async (req: Request, res: Response): Promise<void> => {
     const alert = await prisma.alert.findFirst({
       where: {
         id: alertId,
-        userId: authReq.user.id
-      }
+        userId: authReq.user.id,
+      },
     });
 
     if (!alert) {
       res.status(404).json({
         success: false,
-        message: 'Alerta não encontrado'
+        message: 'Alerta não encontrado',
       });
       return;
     }
@@ -390,13 +434,13 @@ export const testAlert = async (req: Request, res: Response): Promise<void> => {
     // Executar verificação manual do alerta
     const alertToCheck = await prisma.alert.findUnique({
       where: { id: alertId },
-      include: { user: true }
+      include: { user: true },
     });
-    
+
     if (alertToCheck) {
       await alertService.checkSingleAlert(alertToCheck);
     }
-    
+
     const result = { message: 'Verificação executada com sucesso' };
 
     res.json({
@@ -404,8 +448,8 @@ export const testAlert = async (req: Request, res: Response): Promise<void> => {
       data: {
         alertId,
         testResult: result,
-        message: 'Teste do alerta executado com sucesso'
-      }
+        message: 'Teste do alerta executado com sucesso',
+      },
     });
 
     logger.info(`Teste do alerta ${alertId} executado`);
@@ -413,47 +457,51 @@ export const testAlert = async (req: Request, res: Response): Promise<void> => {
     logger.error('Erro ao testar alerta:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
 
 // Obter estatísticas dos alertas do usuário
-export const getAlertStats = async (req: Request, res: Response): Promise<void> => {
+export const getAlertStats = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não autenticado'
+        message: 'Usuário não autenticado',
       });
       return;
     }
 
-    const [totalAlerts, activeAlerts, triggeredAlerts, recentNotifications] = await Promise.all([
-      prisma.alert.count({
-        where: { userId: authReq.user.id }
-      }),
-      prisma.alert.count({
-        where: { userId: authReq.user.id, isActive: true }
-      }),
-      prisma.alert.count({
-        where: {
-          userId: authReq.user.id,
-          lastTriggered: { not: null }
-        }
-      }),
-      prisma.notification.count({
-        where: {
-          alert: {
-            userId: authReq.user.id
+    const [totalAlerts, activeAlerts, triggeredAlerts, recentNotifications] =
+      await Promise.all([
+        prisma.alert.count({
+          where: { userId: authReq.user.id },
+        }),
+        prisma.alert.count({
+          where: { userId: authReq.user.id, isActive: true },
+        }),
+        prisma.alert.count({
+          where: {
+            userId: authReq.user.id,
+            lastTriggered: { not: null },
           },
-          createdAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Últimos 7 dias
-          }
-        }
-      })
-    ]);
+        }),
+        prisma.notification.count({
+          where: {
+            alert: {
+              userId: authReq.user.id,
+            },
+            createdAt: {
+              gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Últimos 7 dias
+            },
+          },
+        }),
+      ]);
 
     const stats = {
       totalAlerts,
@@ -461,20 +509,25 @@ export const getAlertStats = async (req: Request, res: Response): Promise<void> 
       inactiveAlerts: totalAlerts - activeAlerts,
       triggeredAlerts,
       recentNotifications,
-      successRate: totalAlerts > 0 ? (triggeredAlerts / totalAlerts * 100).toFixed(1) : '0'
+      successRate:
+        totalAlerts > 0
+          ? ((triggeredAlerts / totalAlerts) * 100).toFixed(1)
+          : '0',
     };
 
     res.json({
       success: true,
-      data: stats
+      data: stats,
     });
 
-    logger.debug(`Estatísticas de alertas consultadas para usuário ${authReq.user.id}`);
+    logger.debug(
+      `Estatísticas de alertas consultadas para usuário ${authReq.user.id}`
+    );
   } catch (error) {
     logger.error('Erro ao obter estatísticas de alertas:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
@@ -486,5 +539,5 @@ export default {
   updateAlert,
   deleteAlert,
   testAlert,
-  getAlertStats
+  getAlertStats,
 };

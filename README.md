@@ -1,56 +1,101 @@
-# FlightExec - Sistema de Comparação de Voos Executivos
+# ✈️ FlightExec - Sistema de Busca Flexível de Voos Executivos
 
-Um sistema completo para comparação de preços de voos executivos com alertas personalizados e monitoramento em tempo real.
+Sistema completo de busca de voos executivos com integração a múltiplas companhias aéreas brasileiras, oferecendo busca flexível de datas, recomendações inteligentes e links diretos para compra.
 
-## 🚀 Funcionalidades
+## 🚀 Funcionalidades Principais
 
-- **Comparação de Preços**: Integração com múltiplas APIs de companhias aéreas
-- **Alertas Personalizados**: Notificações por email e WhatsApp quando preços atingem valores desejados
-- **Histórico de Preços**: Análise de tendências e variações de preços
-- **Interface Responsiva**: Frontend React moderno e intuitivo
-- **Sistema de Cache**: Otimização de performance com cache inteligente
-- **Rate Limiting**: Proteção contra uso excessivo das APIs
-- **Autenticação Segura**: Sistema completo de login e gerenciamento de usuários
+- **Busca Flexível de Datas**: Encontre voos com ±1 a ±7 dias de flexibilidade
+- **Integração Multi-Companhias**: LATAM, GOL, Azul e outras
+- **Recomendações Inteligentes**: Algoritmo que sugere as melhores ofertas
+- **Cache Inteligente**: Performance otimizada com sistema de cache
+- **Links Diretos**: Redirecionamento direto para compra nas companhias
+- **Calendário de Preços**: Visualização de preços por data
+- **Monitoramento de Ofertas**: Sistema de alertas para melhores preços
 
-## 🏗️ Arquitetura
+## 🏗️ Tecnologias Utilizadas
 
-### Backend (Node.js + Express)
-- **API RESTful** com TypeScript
-- **Banco de dados** PostgreSQL com Prisma ORM
-- **Cache** com NodeCache para otimização
-- **Rate Limiting** configurável por endpoint
-- **WebSocket** para atualizações em tempo real
-- **Sistema de Alertas** com notificações automáticas
+### Backend
+- **Node.js** + **TypeScript**
+- **Express.js** - Framework web
+- **Prisma** - ORM para banco de dados
+- **SQLite** - Banco de dados (desenvolvimento)
+- **Redis** - Cache (produção)
+- **Winston** - Sistema de logs
 
-### Frontend (React + TypeScript)
-- **Interface responsiva** com Tailwind CSS
-- **Estado global** com Zustand
-- **Comunicação em tempo real** via WebSocket
-- **Formulários validados** com React Hook Form
-- **Componentes reutilizáveis** e modulares
+### Frontend
+- **React 18** + **TypeScript**
+- **Vite** - Build tool
+- **Tailwind CSS** - Estilização
+- **Lucide React** - Ícones
+- **React Hooks** - Gerenciamento de estado
 
 ## 📋 Pré-requisitos
 
-- Node.js 18+ 
-- PostgreSQL 14+
-- npm ou yarn
+- **Node.js 18+**
+- **npm** ou **yarn**
+- **Redis** (opcional, para cache em produção)
 
-## 🛠️ Instalação e Configuração
+## 🚀 Instalação Rápida
 
 ### 1. Clone o repositório
 ```bash
-git clone <repository-url>
-cd FlightExec
+git clone https://github.com/seu-usuario/flightexec.git
+cd flightexec
 ```
 
 ### 2. Configuração do Backend
-
 ```bash
 cd backend
 npm install
+
+# Configure as variáveis de ambiente
+cp .env.example .env
+# Edite o arquivo .env com suas credenciais das APIs
+
+# Configure o banco de dados
+npx prisma generate
+npx prisma db push
+
+# Inicie o servidor backend
+npm run dev
 ```
 
-#### Configuração do Banco de Dados
+### 3. Configuração do Frontend
+```bash
+cd ../frontend
+npm install
+
+# Inicie o servidor frontend
+npm run dev
+```
+
+### 4. Acesse a aplicação
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:3001
+
+## ⚙️ Configuração das APIs
+
+Para utilizar as funcionalidades completas, configure as APIs das companhias aéreas no arquivo `.env`:
+
+```env
+# LATAM Airlines
+LATAM_API_KEY="sua_chave_latam"
+LATAM_API_URL="https://api.latam.com/v2"
+
+# GOL Linhas Aéreas
+GOL_API_KEY="sua_chave_gol"
+GOL_API_URL="https://api.voegol.com.br/v1"
+
+# Azul Linhas Aéreas
+AZUL_API_KEY="sua_chave_azul"
+AZUL_API_URL="https://api.voeazul.com.br/v1"
+```
+
+📖 **Guia Completo**: Consulte o [Guia de Configuração das APIs](GUIA_CONFIGURACAO_APIS.md) para instruções detalhadas.
+
+## 🛠️ Configuração Avançada
+
+### Configuração do Banco de Dados PostgreSQL
 
 1. Crie um banco PostgreSQL:
 ```sql
@@ -104,7 +149,7 @@ npx prisma generate
 npx prisma db seed
 ```
 
-### 3. Configuração do Frontend
+### Configuração do Frontend Avançada
 
 ```bash
 cd ../frontend
@@ -175,6 +220,59 @@ npm start
 - **Autenticação**: 5 tentativas por 15 minutos
 - **APIs gerais**: 100 requisições por 15 minutos
 - **Usuários autenticados**: 200 requisições por 15 minutos
+
+## 📱 Como Usar
+
+### 1. Busca Básica de Voos
+1. Acesse http://localhost:5173
+2. Preencha **origem**, **destino** e **data**
+3. Selecione o **número de passageiros**
+4. Clique em **"Buscar Voos"**
+5. Compare preços e horários
+6. Clique em **"Comprar na [Companhia]"** para ser redirecionado
+
+### 2. Busca Flexível de Datas
+1. Ative o toggle **"Busca Flexível"**
+2. Selecione a **flexibilidade de dias** (±1 a ±7)
+3. Clique em **"Buscar com Flexibilidade"**
+4. Visualize o **calendário de preços**
+5. Explore as **recomendações especiais**
+
+### 3. Recursos Avançados
+- **Calendário de Preços**: Veja variações por data
+- **Ofertas Especiais**: Descontos e promoções destacadas
+- **Recomendações**: Sugestões baseadas em algoritmos inteligentes
+- **Links Diretos**: Compra direta nas companhias aéreas
+
+## 📊 Endpoints da API
+
+### Busca Regular
+```http
+POST /api/flights/search
+{
+  "origin": "GRU",
+  "destination": "SDU",
+  "departureDate": "2024-02-15",
+  "passengers": 1
+}
+```
+
+### Busca Flexível
+```http
+POST /api/flights/search-flexible
+{
+  "origin": "GRU",
+  "destination": "SDU",
+  "departureDate": "2024-02-15",
+  "flexibleDays": 3,
+  "passengers": 1
+}
+```
+
+### Ofertas Especiais
+```http
+GET /api/flights/special-offers?route=GRU-SDU&limit=5
+```
 
 ## 🔧 Scripts Disponíveis
 
@@ -250,22 +348,98 @@ docker-compose up -d
    - Verifique a configuração de CORS
    - Confirme as URLs no `.env` do frontend
 
-## 📝 Licença
+## 📚 Documentação Completa
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+- 📖 [**Documentação do Sistema**](DOCUMENTACAO_SISTEMA.md) - Guia completo da arquitetura e funcionalidades
+- 🔧 [**Guia de Configuração das APIs**](GUIA_CONFIGURACAO_APIS.md) - Instruções detalhadas para integração com companhias aéreas
+- 📋 [**Análise de Mudanças**](ANALISE_MUDANCAS_RADAR_VOOS.md) - Detalhamento das implementações realizadas
+
+## 🚀 Deploy
+
+### Desenvolvimento
+```bash
+# Backend
+cd backend && npm run dev
+
+# Frontend  
+cd frontend && npm run dev
+```
+
+### Produção
+```bash
+# Build do projeto
+npm run build
+
+# Iniciar em produção
+npm start
+```
+
+### Docker (Opcional)
+```dockerfile
+# Exemplo de Dockerfile para backend
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 3001
+CMD ["npm", "start"]
+```
+
+## 🔍 Monitoramento
+
+### Logs
+- **Localização**: `backend/logs/`
+- **Formato**: JSON estruturado
+- **Níveis**: error, warn, info, debug
+
+### Health Check
+```bash
+# Verificar status das APIs
+curl http://localhost:3001/health/apis
+
+# Status geral do sistema
+curl http://localhost:3001/health
+```
 
 ## 🤝 Contribuição
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. **Fork** o projeto
+2. Crie uma **branch** para sua feature (`git checkout -b feature/NovaFuncionalidade`)
+3. **Commit** suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. **Push** para a branch (`git push origin feature/NovaFuncionalidade`)
+5. Abra um **Pull Request**
+
+### Padrões de Código
+- **TypeScript** para tipagem estática
+- **ESLint** para linting
+- **Prettier** para formatação
+- **Conventional Commits** para mensagens de commit
+
+## 📄 Licença
+
+Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ## 📞 Suporte
 
-Para suporte, entre em contato através do email: suporte@flightexec.com
+- 📧 **Email**: suporte@flightexec.com
+- 🐛 **Issues**: [GitHub Issues](https://github.com/seu-usuario/flightexec/issues)
+- 💬 **Discussões**: [GitHub Discussions](https://github.com/seu-usuario/flightexec/discussions)
+
+## 🏆 Funcionalidades Implementadas
+
+- ✅ **Busca flexível de datas** com ±1 a ±7 dias
+- ✅ **Integração com APIs** das principais companhias aéreas
+- ✅ **Sistema de cache inteligente** para performance
+- ✅ **Algoritmo de recomendações** baseado em preço e conveniência
+- ✅ **Interface moderna** com React e Tailwind CSS
+- ✅ **Links diretos** para compra nas companhias
+- ✅ **Calendário de preços** visual e interativo
+- ✅ **Monitoramento de ofertas** especiais
+- ✅ **Sistema de logs** estruturado
+- ✅ **Documentação completa** do sistema
 
 ---
 
-**FlightExec** - Encontre os melhores preços para voos executivos! ✈️
+**Desenvolvido com ❤️ pela equipe FlightExec**  
+**Versão**: 1.0.0 | **Última atualização**: Janeiro 2024

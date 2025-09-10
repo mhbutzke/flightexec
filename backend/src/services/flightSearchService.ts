@@ -66,7 +66,9 @@ class FlightSearchService {
   /**
    * Busca voos com base nos parâmetros fornecidos
    */
-  async searchFlights(params: FlightSearchParams): Promise<FlightSearchResult[]> {
+  async searchFlights(
+    params: FlightSearchParams
+  ): Promise<FlightSearchResult[]> {
     // Verificar cache primeiro
     const cachedResults = await cacheService.getCachedFlightSearch(params);
     if (cachedResults) {
@@ -82,31 +84,39 @@ class FlightSearchService {
       flightClass,
       maxPrice,
       preferredAirlines,
-      directFlightsOnly
+      directFlightsOnly,
     } = params;
 
     // Construir filtros dinâmicos
     const whereClause: any = {
       departureAirport: {
-        code: origin
+        code: origin,
       },
       arrivalAirport: {
-        code: destination
+        code: destination,
       },
       departureTime: {
-        gte: new Date(departureDate.getFullYear(), departureDate.getMonth(), departureDate.getDate()),
-        lt: new Date(departureDate.getFullYear(), departureDate.getMonth(), departureDate.getDate() + 1)
+        gte: new Date(
+          departureDate.getFullYear(),
+          departureDate.getMonth(),
+          departureDate.getDate()
+        ),
+        lt: new Date(
+          departureDate.getFullYear(),
+          departureDate.getMonth(),
+          departureDate.getDate() + 1
+        ),
       },
       availableSeats: {
-        gte: passengers
+        gte: passengers,
       },
-      isActive: true
+      isActive: true,
     };
 
     // Filtro por preço máximo
     if (maxPrice) {
       whereClause.price = {
-        lte: maxPrice
+        lte: maxPrice,
       };
     }
 
@@ -114,8 +124,8 @@ class FlightSearchService {
     if (preferredAirlines && preferredAirlines.length > 0) {
       whereClause.airline = {
         code: {
-          in: preferredAirlines
-        }
+          in: preferredAirlines,
+        },
       };
     }
 
@@ -129,41 +139,41 @@ class FlightSearchService {
       include: {
         airline: true,
         departureAirport: true,
-        arrivalAirport: true
+        arrivalAirport: true,
       },
-      orderBy: [
-        { businessPrice: 'asc' },
-        { departureTime: 'asc' }
-      ]
+      orderBy: [{ businessPrice: 'asc' }, { departureTime: 'asc' }],
     });
 
     const results = flights.map(flight => ({
       id: flight.id,
       airline: {
         code: flight.airline.code,
-        name: flight.airline.name
+        name: flight.airline.name,
       },
       flightNumber: flight.flightNumber,
       origin: {
         code: flight.departureAirport.code,
         name: flight.departureAirport.name,
-        city: flight.departureAirport.city
+        city: flight.departureAirport.city,
       },
       destination: {
         code: flight.arrivalAirport.code,
         name: flight.arrivalAirport.name,
-        city: flight.arrivalAirport.city
+        city: flight.arrivalAirport.city,
       },
       departureTime: flight.departureTime,
       arrivalTime: flight.arrivalTime,
       duration: flight.duration,
-      price: params.flightClass === 'business' ? Number(flight.businessPrice || 0) : Number(flight.economyPrice || 0),
+      price:
+        params.flightClass === 'business'
+          ? Number(flight.businessPrice || 0)
+          : Number(flight.economyPrice || 0),
       currency: flight.currency,
       flightClass: params.flightClass,
       availableSeats: flight.availableSeats || 0,
       stops: flight.stops,
       aircraft: flight.aircraft || undefined,
-      isActive: flight.isActive
+      isActive: flight.isActive,
     }));
 
     // Cachear os resultados por 15 minutos
@@ -175,7 +185,9 @@ class FlightSearchService {
   /**
    * Compara preços e fornece análise detalhada
    */
-  async compareFlightPrices(params: FlightSearchParams): Promise<PriceComparison> {
+  async compareFlightPrices(
+    params: FlightSearchParams
+  ): Promise<PriceComparison> {
     const flights = await this.searchFlights(params);
 
     if (flights.length === 0) {
@@ -188,17 +200,18 @@ class FlightSearchService {
       lowest: prices[0],
       highest: prices[prices.length - 1],
       average: prices.reduce((sum, price) => sum + price, 0) / prices.length,
-      median: prices.length % 2 === 0 
-        ? (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2
-        : prices[Math.floor(prices.length / 2)]
+      median:
+        prices.length % 2 === 0
+          ? (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2
+          : prices[Math.floor(prices.length / 2)],
     };
 
     // Encontrar recomendações
-    const bestPrice = flights.reduce((best, current) => 
+    const bestPrice = flights.reduce((best, current) =>
       current.price < best.price ? current : best
     );
 
-    const fastest = flights.reduce((fastest, current) => 
+    const fastest = flights.reduce((fastest, current) =>
       current.duration < fastest.duration ? current : fastest
     );
 
@@ -213,10 +226,14 @@ class FlightSearchService {
     const mostComfortable = flights
       .filter(f => f.flightClass === 'business')
       .reduce((best, current) => {
-        if (!best) return current;
-        
+        if (!best) {
+          return current;
+        }
+
         // Prioriza menos paradas
-        if (current.stops < best.stops) return current;
+        if (current.stops < best.stops) {
+          return current;
+        }
         return best;
       }, flights[0]);
 
@@ -227,8 +244,8 @@ class FlightSearchService {
         bestPrice,
         bestValue,
         fastest,
-        mostComfortable
-      }
+        mostComfortable,
+      },
     };
   }
 
@@ -239,28 +256,39 @@ class FlightSearchService {
     // Score baseado em preço (invertido), duração (invertida) e paradas (invertidas)
     const priceScore = 1000 / flight.price; // Quanto menor o preço, maior o score
     const durationScore = 1000 / flight.duration; // Quanto menor a duração, maior o score
-    const stopsScore = flight.stops === 0 ? 100 : (flight.stops === 1 ? 50 : 25); // Penaliza paradas
-    
+    const stopsScore = flight.stops === 0 ? 100 : flight.stops === 1 ? 50 : 25; // Penaliza paradas
+
     return priceScore + durationScore + stopsScore;
   }
 
   /**
    * Filtra voos por classe executiva com critérios específicos
    */
-  async searchBusinessClassFlights(params: Omit<FlightSearchParams, 'flightClass'>): Promise<FlightSearchResult[]> {
+  async searchBusinessClassFlights(
+    params: Omit<FlightSearchParams, 'flightClass'>
+  ): Promise<FlightSearchResult[]> {
     return this.searchFlights({
       ...params,
-      flightClass: 'business'
+      flightClass: 'business',
     });
   }
 
   /**
    * Busca histórico de preços para análise de tendências
    */
-  async getPriceHistory(origin: string, destination: string, flightClass: FlightClass, days: number = 30): Promise<any[]> {
+  async getPriceHistory(
+    origin: string,
+    destination: string,
+    flightClass: FlightClass,
+    days: number = 30
+  ): Promise<any[]> {
     try {
       // Verificar cache primeiro
-      const cachedHistory = await cacheService.getCachedPriceHistory(origin, destination, flightClass);
+      const cachedHistory = await cacheService.getCachedPriceHistory(
+        origin,
+        destination,
+        flightClass
+      );
       if (cachedHistory) {
         console.log('Returning cached price history');
         return cachedHistory;
@@ -273,37 +301,45 @@ class FlightSearchService {
         where: {
           flight: {
             departureAirport: { code: origin },
-            arrivalAirport: { code: destination }
+            arrivalAirport: { code: destination },
           },
           timestamp: {
-            gte: startDate
-          }
+            gte: startDate,
+          },
         },
         include: {
           flight: {
             include: {
-              airline: true
-            }
-          }
+              airline: true,
+            },
+          },
         },
         orderBy: {
-          timestamp: 'asc'
-        }
+          timestamp: 'asc',
+        },
       });
 
       const results = priceHistory.map(record => ({
         date: record.timestamp,
-        price: flightClass === 'business' ? Number(record.businessPrice || 0) : Number(record.economyPrice || 0),
+        price:
+          flightClass === 'business'
+            ? Number(record.businessPrice || 0)
+            : Number(record.economyPrice || 0),
         currency: record.currency,
         flightNumber: record.flight.flightNumber,
-        airline: record.flight.airline.name
+        airline: record.flight.airline.name,
       }));
 
       // Cachear por 1 hora
-      await cacheService.cachePriceHistory(origin, destination, flightClass, results, 3600);
+      await cacheService.cachePriceHistory(
+        origin,
+        destination,
+        flightClass,
+        results,
+        3600
+      );
 
       return results;
-
     } catch (error) {
       console.error('Error getting price history:', error);
       throw error;
@@ -313,7 +349,11 @@ class FlightSearchService {
   /**
    * Salva busca do usuário para histórico
    */
-  async saveUserSearch(userId: string, params: FlightSearchParams, results: FlightSearchResult[]): Promise<void> {
+  async saveUserSearch(
+    userId: string,
+    params: FlightSearchParams,
+    results: FlightSearchResult[]
+  ): Promise<void> {
     await prisma.search.create({
       data: {
         userId,
@@ -323,8 +363,8 @@ class FlightSearchService {
         returnDate: params.returnDate,
         passengers: params.passengers,
         classType: params.flightClass,
-        resultsCount: results.length
-      }
+        resultsCount: results.length,
+      },
     });
   }
 }

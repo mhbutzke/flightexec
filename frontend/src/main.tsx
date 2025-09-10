@@ -12,7 +12,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 3,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       staleTime: 5 * 60 * 1000, // 5 minutos
       gcTime: 10 * 60 * 1000, // 10 minutos
       refetchOnWindowFocus: false,
@@ -29,7 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <App />
         <Toaster
-          position="top-right"
+          position='top-right'
           toastOptions={{
             duration: 4000,
             style: {

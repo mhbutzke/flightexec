@@ -9,7 +9,7 @@ router.get('/', async (req: Request, res: Response) => {
     // TODO: Implementar busca de voos
     res.json({
       message: 'Endpoint de busca de voos - em desenvolvimento',
-      query: req.query
+      query: req.query,
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -22,7 +22,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     // TODO: Implementar busca por ID
     res.json({
-      message: `Detalhes do voo ${id} - em desenvolvimento`
+      message: `Detalhes do voo ${id} - em desenvolvimento`,
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -35,7 +35,7 @@ router.post('/compare', async (req: Request, res: Response) => {
     // TODO: Implementar comparação de voos
     res.json({
       message: 'Comparação de voos - em desenvolvimento',
-      body: req.body
+      body: req.body,
     });
   } catch (error) {
     res.status(500).json({ error: 'Erro interno do servidor' });

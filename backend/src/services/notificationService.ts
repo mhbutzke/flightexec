@@ -6,7 +6,11 @@ const prisma = new PrismaClient();
 
 export interface NotificationData {
   userId: string;
-  type: 'price_alert' | 'flight_delay' | 'booking_confirmation' | 'system_update';
+  type:
+    | 'price_alert'
+    | 'flight_delay'
+    | 'booking_confirmation'
+    | 'system_update';
   title: string;
   message: string;
   metadata?: any;
@@ -29,10 +33,12 @@ class NotificationService {
     try {
       // Buscar preferências do usuário
       const userPreferences = await this.getUserPreferences(data.userId);
-      
+
       // Verificar se o usuário quer receber este tipo de notificação
       if (!this.shouldSendNotification(data.type, userPreferences)) {
-        logger.info(`Notificação não enviada - usuário ${data.userId} desabilitou ${data.type}`);
+        logger.info(
+          `Notificação não enviada - usuário ${data.userId} desabilitou ${data.type}`
+        );
         return null;
       }
 
@@ -44,16 +50,20 @@ class NotificationService {
           title: data.title,
           message: data.message,
           type: data.type,
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       });
 
       // Enviar através dos canais apropriados
-      await this.sendThroughChannels(notification, data.channels || ['push'], userPreferences);
+      await this.sendThroughChannels(
+        notification,
+        data.channels || ['push'],
+        userPreferences
+      );
 
       logger.info(`Notificação criada para usuário ${data.userId}`, {
         notificationId: notification.id,
-        type: data.type
+        type: data.type,
       });
 
       return notification;
@@ -67,7 +77,7 @@ class NotificationService {
   async getUserPreferences(userId: string): Promise<NotificationPreferences> {
     try {
       const user = await prisma.user.findUnique({
-        where: { id: userId }
+        where: { id: userId },
       });
 
       if (!user) {
@@ -78,7 +88,7 @@ class NotificationService {
           smsNotifications: false,
           priceAlerts: true,
           flightUpdates: true,
-          systemUpdates: true
+          systemUpdates: true,
         };
       }
 
@@ -89,7 +99,7 @@ class NotificationService {
         smsNotifications: false,
         priceAlerts: true,
         flightUpdates: true,
-        systemUpdates: true
+        systemUpdates: true,
       };
     } catch (error) {
       logger.error('Erro ao buscar preferências do usuário:', error);
@@ -100,13 +110,16 @@ class NotificationService {
         smsNotifications: false,
         priceAlerts: true,
         flightUpdates: true,
-        systemUpdates: true
+        systemUpdates: true,
       };
     }
   }
 
   // Verificar se deve enviar notificação baseado nas preferências
-  private shouldSendNotification(type: string, preferences: NotificationPreferences): boolean {
+  private shouldSendNotification(
+    type: string,
+    preferences: NotificationPreferences
+  ): boolean {
     switch (type) {
       case 'price_alert':
         return preferences.priceAlerts;
@@ -157,7 +170,7 @@ class NotificationService {
     try {
       const user = await prisma.user.findUnique({
         where: { id: notification.userId },
-        select: { email: true, name: true }
+        select: { email: true, name: true },
       });
 
       if (!user?.email) {
@@ -171,7 +184,7 @@ class NotificationService {
         userName: user.name || 'Usuário',
         alertName: notification.title,
         flightData: { message: notification.message },
-        triggerType: 'price_drop'
+        triggerType: 'price_drop',
       });
 
       logger.info(`Email de notificação enviado para ${user.email}`);
@@ -185,11 +198,14 @@ class NotificationService {
     try {
       // Aqui você integraria com um serviço de push notifications
       // como Firebase Cloud Messaging, OneSignal, etc.
-      
-      logger.info(`Push notification enviada para usuário ${notification.userId}`, {
-        title: notification.title,
-        message: notification.message
-      });
+
+      logger.info(
+        `Push notification enviada para usuário ${notification.userId}`,
+        {
+          title: notification.title,
+          message: notification.message,
+        }
+      );
 
       // Exemplo de integração com Firebase (comentado)
       /*
@@ -217,9 +233,9 @@ class NotificationService {
     try {
       // Aqui você integraria com um serviço de SMS
       // como Twilio, AWS SNS, etc.
-      
+
       logger.info(`SMS enviado para usuário ${notification.userId}`, {
-        title: notification.title
+        title: notification.title,
       });
 
       // Exemplo de integração com Twilio (comentado)
@@ -273,17 +289,19 @@ class NotificationService {
           include: {
             alert: {
               select: {
-                userId: true
-              }
-            }
-          }
+                userId: true,
+              },
+            },
+          },
         }),
         prisma.notification.count({ where: whereClause }),
-        prisma.notification.count({ where: { status: 'pending' } })
+        prisma.notification.count({ where: { status: 'pending' } }),
       ]);
 
       // Filtrar notificações do usuário
-      const userNotifications = notifications.filter(n => n.alert.userId === userId);
+      const userNotifications = notifications.filter(
+        n => n.alert.userId === userId
+      );
 
       return { notifications: userNotifications, total, unread };
     } catch (error) {
@@ -300,9 +318,9 @@ class NotificationService {
         where: {
           id: notificationId,
           alert: {
-            userId: userId
-          }
-        }
+            userId: userId,
+          },
+        },
       });
 
       if (notification) {
@@ -310,8 +328,8 @@ class NotificationService {
           where: { id: notificationId },
           data: {
             status: 'sent',
-            sentAt: new Date()
-          }
+            sentAt: new Date(),
+          },
         });
       }
 
@@ -328,17 +346,19 @@ class NotificationService {
       const result = await prisma.notification.updateMany({
         where: {
           alert: {
-            userId: userId
+            userId: userId,
           },
-          status: 'pending'
+          status: 'pending',
         },
         data: {
           status: 'sent',
-          sentAt: new Date()
-        }
+          sentAt: new Date(),
+        },
       });
 
-      logger.info(`${result.count} notificações marcadas como lidas para usuário ${userId}`);
+      logger.info(
+        `${result.count} notificações marcadas como lidas para usuário ${userId}`
+      );
       return result.count;
     } catch (error) {
       logger.error('Erro ao marcar todas as notificações como lidas:', error);
@@ -347,21 +367,24 @@ class NotificationService {
   }
 
   // Deletar notificação
-  async deleteNotification(notificationId: string, userId: string): Promise<void> {
+  async deleteNotification(
+    notificationId: string,
+    userId: string
+  ): Promise<void> {
     try {
       // Verificar se a notificação pertence ao usuário antes de deletar
       const notification = await prisma.notification.findFirst({
         where: {
           id: notificationId,
           alert: {
-            userId: userId
-          }
-        }
+            userId: userId,
+          },
+        },
       });
 
       if (notification) {
         await prisma.notification.delete({
-          where: { id: notificationId }
+          where: { id: notificationId },
         });
       }
 
@@ -381,10 +404,10 @@ class NotificationService {
       const result = await prisma.notification.deleteMany({
         where: {
           createdAt: {
-            lt: cutoffDate
+            lt: cutoffDate,
           },
-          status: 'sent'
-        }
+          status: 'sent',
+        },
       });
 
       logger.info(`${result.count} notificações antigas removidas`);
@@ -403,10 +426,12 @@ class NotificationService {
     try {
       await prisma.user.update({
         where: { id: userId },
-        data: preferences
+        data: preferences,
       });
 
-      logger.info(`Preferências de notificação atualizadas para usuário ${userId}`);
+      logger.info(
+        `Preferências de notificação atualizadas para usuário ${userId}`
+      );
     } catch (error) {
       logger.error('Erro ao atualizar preferências de notificação:', error);
       throw new Error('Falha ao atualizar preferências');
@@ -420,24 +445,24 @@ class NotificationService {
         prisma.notification.count({
           where: {
             alert: {
-              userId: userId
-            }
-          }
+              userId: userId,
+            },
+          },
         }),
         prisma.notification.count({
           where: {
             alert: {
-              userId: userId
+              userId: userId,
             },
-            status: 'pending'
-          }
-        })
+            status: 'pending',
+          },
+        }),
       ]);
 
       return {
         total,
         unread,
-        read: total - unread
+        read: total - unread,
       };
     } catch (error) {
       logger.error('Erro ao obter estatísticas de notificações:', error);

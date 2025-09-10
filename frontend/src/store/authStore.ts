@@ -1,12 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  createdAt: string;
-}
+import { authApi, User } from '@/services/apiService';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 interface AuthState {
   user: User | null;
@@ -21,7 +16,8 @@ interface AuthState {
   checkAuth: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>()(  persist(
+export const useAuthStore = create<AuthState>()(
+  persist(
     (set, get) => ({
       user: null,
       token: null,
@@ -31,24 +27,18 @@ export const useAuthStore = create<AuthState>()(  persist(
       login: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
-          // Simulação de login - substituir pela API real
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const response = await authApi.login(email, password);
           
-          const mockUser: User = {
-            id: '1',
-            email,
-            name: email.split('@')[0],
-            createdAt: new Date().toISOString()
-          };
-          
-          const mockToken = 'mock-jwt-token-' + Date.now();
-          
-          set({ 
-            user: mockUser, 
-            token: mockToken, 
-            isAuthenticated: true, 
-            isLoading: false 
-          });
+          if (response.success && response.data) {
+            set({
+              user: response.data.user,
+              token: response.data.token,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            throw new Error(response.error?.message || 'Erro no login');
+          }
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -58,37 +48,38 @@ export const useAuthStore = create<AuthState>()(  persist(
       register: async (email: string, password: string, name?: string) => {
         set({ isLoading: true });
         try {
-          // Simulação de registro - substituir pela API real
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const response = await authApi.register(email, password, name || email.split('@')[0]);
           
-          const mockUser: User = {
-            id: '1',
-            email,
-            name: name || email.split('@')[0],
-            createdAt: new Date().toISOString()
-          };
-          
-          const mockToken = 'mock-jwt-token-' + Date.now();
-          
-          set({ 
-            user: mockUser, 
-            token: mockToken, 
-            isAuthenticated: true, 
-            isLoading: false 
-          });
+          if (response.success && response.data) {
+            set({
+              user: response.data.user,
+              token: response.data.token,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            throw new Error(response.error?.message || 'Erro no registro');
+          }
         } catch (error) {
           set({ isLoading: false });
           throw error;
         }
       },
 
-      logout: () => {
-        set({ 
-          user: null, 
-          token: null, 
-          isAuthenticated: false, 
-          isLoading: false 
-        });
+      logout: async () => {
+        try {
+          await authApi.logout();
+        } catch (error) {
+          // Ignorar erros de logout, limpar estado local mesmo assim
+          console.warn('Erro ao fazer logout:', error);
+        } finally {
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
       },
 
       setUser: (user: User) => {
@@ -108,28 +99,35 @@ export const useAuthStore = create<AuthState>()(  persist(
 
         set({ isLoading: true });
         try {
-          // Simulação de verificação de token - substituir pela API real
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Tentar renovar o token
+          const response = await authApi.refreshToken();
           
-          // Se chegou até aqui, o token é válido
-          set({ isAuthenticated: true, isLoading: false });
+          if (response.success && response.data) {
+            set({ 
+              token: response.data.token,
+              isAuthenticated: true, 
+              isLoading: false 
+            });
+          } else {
+            throw new Error('Token inválido');
+          }
         } catch (error) {
-          // Token inválido
-          set({ 
-            user: null, 
-            token: null, 
-            isAuthenticated: false, 
-            isLoading: false 
+          // Token inválido ou expirado
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            isLoading: false,
           });
         }
       },
     }),
     {
       name: 'auth-storage',
-      partialize: (state: AuthState) => ({ 
-        user: state.user, 
-        token: state.token, 
-        isAuthenticated: state.isAuthenticated 
+      partialize: (state: AuthState) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
       }),
     }
   )

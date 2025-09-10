@@ -84,13 +84,27 @@ model Flight {
   externalId      String?  // ID na API externa
   lastUpdated     DateTime @default(now())
   createdAt       DateTime @default(now())
+  
+  // Novos campos para ofertas e busca flexível
+  isOffer          Boolean  @default(false)
+  originalPrice    Decimal?
+  discountPercent  Float?
+  offerValidUntil  DateTime?
+  bookingUrl       String?  // URL direta para compra
+  deepLinkUrl      String?  // Deep link da companhia
+  flexibleDates    Boolean  @default(false)
+  dateRange        Int?     // ±dias de flexibilidade
+  offerSource      String?  // origem da oferta
+  lastPriceCheck   DateTime @default(now())
+  priceChangeAlert Boolean  @default(false)
 
   // Relacionamentos
-  airline           Airline    @relation(fields: [airlineId], references: [id])
-  departureAirport  Airport    @relation("DepartureAirport", fields: [departureId], references: [id])
-  arrivalAirport    Airport    @relation("ArrivalAirport", fields: [arrivalId], references: [id])
+  airline           Airline        @relation(fields: [airlineId], references: [id])
+  departureAirport  Airport        @relation("DepartureAirport", fields: [departureId], references: [id])
+  arrivalAirport    Airport        @relation("ArrivalAirport", fields: [arrivalId], references: [id])
   priceHistory      PriceHistory[]
   favorites         Favorite[]
+  specialOffers     SpecialOffer[]
 
   @@map("flights")
 }
@@ -189,6 +203,55 @@ model Favorite {
 
   @@unique([userId, flightId])
   @@map("favorites")
+}
+
+// Modelo de Ofertas Especiais
+model SpecialOffer {
+  id               String   @id @default(cuid())
+  flightId         String
+  title            String
+  description      String?
+  discountPercent  Float
+  originalPrice    Decimal
+  offerPrice       Decimal
+  validFrom        DateTime
+  validUntil       DateTime
+  maxBookings      Int?
+  currentBookings  Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  
+  flight           Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  
+  @@map("special_offers")
+}
+
+// Modelo de Alertas de Preço
+model PriceAlert {
+  id               String   @id @default(cuid())
+  route            String   // "GRU-JFK"
+  targetPrice      Decimal
+  currentPrice     Decimal?
+  priceDropPercent Float?   // % de queda necessária
+  isTriggered      Boolean  @default(false)
+  lastCheck        DateTime @default(now())
+  createdAt        DateTime @default(now())
+  
+  @@map("price_alerts")
+}
+
+// Modelo de Rotas Populares
+model PopularRoute {
+  id            String   @id @default(cuid())
+  origin        String   // Código do aeroporto
+  destination   String   // Código do aeroporto
+  searchCount   Int      @default(1)
+  avgPrice      Decimal?
+  lastSearched  DateTime @default(now())
+  createdAt     DateTime @default(now())
+  
+  @@unique([origin, destination])
+  @@map("popular_routes")
 }
 
 // Modelo de Configuração do Sistema

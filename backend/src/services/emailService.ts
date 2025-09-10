@@ -48,20 +48,22 @@ class EmailService {
         secure: process.env.SMTP_SECURE === 'true',
         auth: {
           user: process.env.SMTP_USER || '',
-          pass: process.env.SMTP_PASS || ''
-        }
+          pass: process.env.SMTP_PASS || '',
+        },
       };
 
       if (!emailConfig.auth.user || !emailConfig.auth.pass) {
-        logger.warn('Credenciais de email não configuradas. Serviço de email desabilitado.');
+        logger.warn(
+          'Credenciais de email não configuradas. Serviço de email desabilitado.'
+        );
         return;
       }
 
       this.transporter = nodemailer.createTransport(emailConfig);
       this.isConfigured = true;
-      
+
       // Verificar conexão
-      this.transporter.verify((error) => {
+      this.transporter.verify(error => {
         if (error) {
           logger.error('Erro na configuração do email:', error);
           this.isConfigured = false;
@@ -83,14 +85,17 @@ class EmailService {
     }
 
     try {
-      const subject = this.generateAlertSubject(data.triggerType, data.flightData);
+      const subject = this.generateAlertSubject(
+        data.triggerType,
+        data.flightData
+      );
       const html = this.generateAlertEmailHTML(data);
 
       const mailOptions = {
         from: `"FlightExec" <${process.env.SMTP_USER}>`,
         to: data.to,
         subject,
-        html
+        html,
       };
 
       await this.transporter.sendMail(mailOptions);
@@ -117,7 +122,7 @@ class EmailService {
         from: `"FlightExec" <${process.env.SMTP_USER}>`,
         to: data.to,
         subject,
-        html
+        html,
       };
 
       await this.transporter.sendMail(mailOptions);
@@ -144,7 +149,7 @@ class EmailService {
         from: `"FlightExec" <${process.env.SMTP_USER}>`,
         to: data.to,
         subject,
-        html
+        html,
       };
 
       await this.transporter.sendMail(mailOptions);
@@ -159,7 +164,7 @@ class EmailService {
   // Gerar assunto do email de alerta
   private generateAlertSubject(triggerType: string, flightData: any): string {
     const route = `${flightData.origin} → ${flightData.destination}`;
-    
+
     switch (triggerType) {
       case 'price_drop':
         return `💰 Preço Reduzido: ${route} - FlightExec`;
@@ -177,27 +182,34 @@ class EmailService {
     const flight = data.flightData;
     const price = new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: flight.currency || 'BRL'
+      currency: flight.currency || 'BRL',
     }).format(flight.price);
 
-    const departureDate = new Date(flight.departureTime).toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    const departureDate = new Date(flight.departureTime).toLocaleDateString(
+      'pt-BR',
+      {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }
+    );
 
-    const departureTime = new Date(flight.departureTime).toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const departureTime = new Date(flight.departureTime).toLocaleTimeString(
+      'pt-BR',
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+      }
+    );
 
     const duration = `${Math.floor(flight.duration / 60)}h${flight.duration % 60}m`;
-    const stops = flight.stops === 0 ? 'Voo direto' : `${flight.stops} parada(s)`;
+    const stops =
+      flight.stops === 0 ? 'Voo direto' : `${flight.stops} parada(s)`;
 
     let alertIcon = '✈️';
     let alertMessage = 'Encontramos um voo que corresponde ao seu alerta!';
-    
+
     switch (data.triggerType) {
       case 'price_drop':
         alertIcon = '💰';

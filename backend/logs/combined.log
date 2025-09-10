@@ -42,3 +42,12 @@
 {"level":"info","message":"Conexão com Redis estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
 {"level":"info","message":"Servidor rodando na porta 5001","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
 {"level":"info","message":"Ambiente: development","service":"flightexec-backend","timestamp":"2025-09-10 10:57:58"}
+{"level":"warn","message":"Credenciais de email não configuradas. Serviço de email desabilitado.","service":"flightexec-backend","timestamp":"2025-09-10 13:07:39"}
+{"level":"info","message":"Conexão com PostgreSQL estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}
+{"level":"info","message":"Conexão com banco de dados estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}
+{"level":"info","message":"Conectando ao Redis...","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}
+{"level":"info","message":"Redis pronto para uso","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}
+{"level":"info","message":"Conexão com Redis estabelecida com sucesso","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}
+{"level":"info","message":"Conexão com Redis estabelecida","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}
+{"level":"info","message":"Servidor rodando na porta 5001","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}
+{"level":"info","message":"Ambiente: development","service":"flightexec-backend","timestamp":"2025-09-10 13:07:40"}

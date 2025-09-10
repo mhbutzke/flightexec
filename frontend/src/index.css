@@ -6,11 +6,11 @@
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
-  
+
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
   }
-  
+
   * {
     @apply border-gray-200;
   }
@@ -21,83 +21,83 @@
   .btn {
     @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  
+
   .btn-primary {
     @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
   }
-  
+
   .btn-secondary {
     @apply btn bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus:ring-secondary-500;
   }
-  
+
   .btn-success {
     @apply btn bg-success-600 text-white hover:bg-success-700 focus:ring-success-500;
   }
-  
+
   .btn-warning {
     @apply btn bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500;
   }
-  
+
   .btn-error {
     @apply btn bg-error-600 text-white hover:bg-error-700 focus:ring-error-500;
   }
-  
+
   .btn-outline {
     @apply btn border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-primary-500;
   }
-  
+
   .btn-ghost {
     @apply btn bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-primary-500;
   }
-  
+
   /* Inputs */
   .input {
     @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors;
   }
-  
+
   .input-error {
     @apply input border-error-300 focus:ring-error-500 focus:border-error-500;
   }
-  
+
   /* Cards */
   .card {
     @apply bg-white rounded-xl shadow-soft border border-gray-100;
   }
-  
+
   .card-hover {
     @apply card hover:shadow-medium transition-shadow duration-200;
   }
-  
+
   /* Loading */
   .loading {
     @apply animate-pulse;
   }
-  
+
   .loading-spinner {
     @apply animate-spin rounded-full border-2 border-gray-300 border-t-primary-600;
   }
-  
+
   /* Badges */
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
-  
+
   .badge-primary {
     @apply badge bg-primary-100 text-primary-800;
   }
-  
+
   .badge-success {
     @apply badge bg-success-100 text-success-800;
   }
-  
+
   .badge-warning {
     @apply badge bg-warning-100 text-warning-800;
   }
-  
+
   .badge-error {
     @apply badge bg-error-100 text-error-800;
   }
-  
+
   .badge-secondary {
     @apply badge bg-secondary-100 text-secondary-800;
   }
@@ -109,46 +109,46 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(203 213 225) transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: rgb(203 213 225);
     border-radius: 3px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: rgb(148 163 184);
   }
-  
+
   /* Animações customizadas */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
   }
-  
+
   .animate-slide-down {
     animation: slideDown 0.3s ease-out;
   }
-  
+
   /* Gradientes */
   .gradient-primary {
     background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   }
-  
+
   .gradient-secondary {
     background: linear-gradient(135deg, #64748b 0%, #334155 100%);
   }
-  
+
   /* Texto */
   .text-gradient {
     background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
@@ -214,7 +214,7 @@
   .btn {
     @apply px-3 py-1.5 text-xs;
   }
-  
+
   .card {
     @apply rounded-lg;
   }

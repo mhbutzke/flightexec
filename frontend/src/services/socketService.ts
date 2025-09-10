@@ -7,7 +7,7 @@ class SocketService {
 
   connect() {
     const { token } = useAuthStore.getState();
-    
+
     if (this.socket?.connected) {
       return;
     }
@@ -15,9 +15,9 @@ class SocketService {
     // Conecta ao servidor WebSocket
     this.socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
       auth: {
-        token
+        token,
       },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
     });
 
     this.socket.on('connect', () => {
@@ -30,18 +30,18 @@ class SocketService {
       this.isConnected = false;
     });
 
-    this.socket.on('connect_error', (error) => {
+    this.socket.on('connect_error', error => {
       console.error('Erro de conexão do socket:', error);
     });
 
     // Listeners para notificações de alertas
-    this.socket.on('alert_triggered', (data) => {
+    this.socket.on('alert_triggered', data => {
       console.log('Alerta disparado:', data);
       // Aqui você pode adicionar lógica para mostrar notificações
       this.showNotification('Alerta de Voo', data.message);
     });
 
-    this.socket.on('price_update', (data) => {
+    this.socket.on('price_update', data => {
       console.log('Atualização de preço:', data);
       // Aqui você pode atualizar o estado da aplicação
     });
@@ -82,15 +82,18 @@ class SocketService {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(title, {
         body: message,
-        icon: '/favicon.ico'
+        icon: '/favicon.ico',
       });
-    } else if ('Notification' in window && Notification.permission !== 'denied') {
+    } else if (
+      'Notification' in window &&
+      Notification.permission !== 'denied'
+    ) {
       // Solicita permissão para notificações
-      Notification.requestPermission().then((permission) => {
+      Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           new Notification(title, {
             body: message,
-            icon: '/favicon.ico'
+            icon: '/favicon.ico',
           });
         }
       });

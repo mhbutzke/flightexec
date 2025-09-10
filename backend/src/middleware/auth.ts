@@ -32,7 +32,7 @@ export const authenticateToken = async (
     if (!token) {
       res.status(401).json({
         success: false,
-        message: 'Token de acesso requerido'
+        message: 'Token de acesso requerido',
       });
       return;
     }
@@ -50,14 +50,14 @@ export const authenticateToken = async (
         id: true,
         email: true,
         name: true,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     if (!user) {
       res.status(401).json({
         success: false,
-        message: 'Usuário não encontrado'
+        message: 'Usuário não encontrado',
       });
       return;
     }
@@ -65,7 +65,7 @@ export const authenticateToken = async (
     if (!user.isActive) {
       res.status(401).json({
         success: false,
-        message: 'Conta desativada'
+        message: 'Conta desativada',
       });
       return;
     }
@@ -74,7 +74,7 @@ export const authenticateToken = async (
     (req as AuthenticatedRequest).user = {
       id: user.id,
       email: user.email,
-      name: user.name
+      name: user.name,
     };
 
     next();
@@ -82,7 +82,7 @@ export const authenticateToken = async (
     if (error instanceof jwt.JsonWebTokenError) {
       res.status(401).json({
         success: false,
-        message: 'Token inválido'
+        message: 'Token inválido',
       });
       return;
     }
@@ -90,7 +90,7 @@ export const authenticateToken = async (
     if (error instanceof jwt.TokenExpiredError) {
       res.status(401).json({
         success: false,
-        message: 'Token expirado'
+        message: 'Token expirado',
       });
       return;
     }
@@ -98,7 +98,7 @@ export const authenticateToken = async (
     logger.error('Erro na autenticação:', error);
     res.status(500).json({
       success: false,
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
   }
 };
@@ -131,15 +131,15 @@ export const optionalAuth = async (
         id: true,
         email: true,
         name: true,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     if (user && user.isActive) {
       (req as AuthenticatedRequest).user = {
         id: user.id,
         email: user.email,
-        name: user.name
+        name: user.name,
       };
     }
 
@@ -158,11 +158,11 @@ export const requireAdmin = async (
   next: NextFunction
 ): Promise<void> => {
   const authReq = req as AuthenticatedRequest;
-  
+
   if (!authReq.user) {
     res.status(401).json({
       success: false,
-      message: 'Autenticação requerida'
+      message: 'Autenticação requerida',
     });
     return;
   }
@@ -175,5 +175,5 @@ export const requireAdmin = async (
 export default {
   authenticateToken,
   optionalAuth,
-  requireAdmin
+  requireAdmin,
 };
